@@ -33,13 +33,17 @@ Notes from execution:
 - Zod 4 deprecates `z.string().url()` in favor of the standalone `z.url()`. Schema uses the new form.
 - `pnpm astro sync` and `pnpm astro check` both clean (0 errors / 0 warnings / 0 hints).
 
-### 3. i18n plumbing — pending
-**Goal:** Locale toggle visible in the header, working both directions, on every page.
+### 3. i18n plumbing — done
 
-- `src/i18n/ui.ts` with the typed strings dictionary (header labels, footer, "not yet available in this language" notice copy).
-- `src/i18n/utils.ts` with `getLocaleFromUrl(url)`, `localizedPath(currentPath, targetLocale)`, `t(locale, key)`.
-- `<LocaleToggle />` component in `Header`.
-- **Validation:** Manually click the toggle from `/`, `/projects`, and a deeply nested page; correct mirror URL resolves in each case. Helpers covered by a couple of unit tests if a test runner is in place; otherwise document the manual verification path.
+`src/i18n/ui.ts` holds the typed strings dictionary for both locales (nav labels, locale-toggle aria/label, missing-translation notice, home placeholder copy). `src/i18n/utils.ts` provides `getLocaleFromUrl`, `localizedPath`, `otherLocale`, and a typed `t(locale, key)`. `src/components/layout/LocaleToggle.astro` derives current locale from `Astro.url`, computes the mirror path, and renders a sober underlined link.
+
+The placeholder home pages (`src/pages/index.astro` for `/` and `src/pages/es/index.astro` for `/es/`) now use the helpers and host the toggle. They'll be replaced by `BaseLayout` + real copy in Steps 4–5.
+
+Verification (no test runner installed yet):
+
+- Built HTML for `/` shows `lang="en"` + toggle `href="/es"` + EN body copy; built HTML for `/es/` shows `lang="es"` + toggle `href="/"` + ES body copy.
+- Helper smoke run via `pnpm dlx tsx -e ...` covered 10 path cases (root, prefixed, deeply nested in either locale, and a defensive `/something/es` that must resolve to default `en`). All pass.
+- When a real test runner lands (deferred), this manual run gets replaced by a Vitest spec.
 
 ### 4. Base layout, Header, Footer — pending
 **Goal:** A consistent `BaseLayout` wraps every page. Header has navigation (Home / Projects / Articles / Now / Contact) plus the locale toggle. Footer is minimal.

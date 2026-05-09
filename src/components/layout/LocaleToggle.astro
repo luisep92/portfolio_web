@@ -1,0 +1,15 @@
+---
+import { getLocaleFromUrl, localizedPath, otherLocale, t } from '../../i18n/utils';
+
+const currentLocale = getLocaleFromUrl(Astro.url);
+const target = otherLocale(currentLocale);
+const href = localizedPath(Astro.url.pathname, target);
+---
+
+<a
+  href={href}
+  aria-label={t(currentLocale, 'locale.toggle.aria')}
+  class="text-sm text-neutral-400 underline-offset-4 hover:text-neutral-100 hover:underline transition-colors"
+>
+  {t(currentLocale, 'locale.toggle.label')}
+</a>
