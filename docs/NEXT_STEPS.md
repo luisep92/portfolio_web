@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: scaffolding.** Docs harness in place. **Steps 1–5 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; `pnpm build` clean. Content collections defined for `articles` and `projects`. i18n plumbing + `<LocaleToggle />` wired through `BaseLayout` + `Header` + `Footer` + `Container`. **Static pages done in both locales**: Home (bio), Now, Contact (real handles), plus index placeholders for Projects and Articles so the nav resolves. 10 pages currently built. Next: **Step 6** — dynamic `[slug]` pages for projects (featured tier) and articles, including the partial-bilingual fallback layout.
+**Phase: scaffolding.** Docs harness in place. **Steps 1–6 complete**: full static + dynamic page pipeline. Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; `pnpm build` clean. Content collections defined for `articles` and `projects` with locale-folder layout. i18n plumbing + `<LocaleToggle />` wired through `BaseLayout` + `Header` + `Footer` + `Container`. Static pages live in both locales (Home, Now, Contact, Projects index, Articles index). Dynamic `[slug]` pages for projects (featured tier) and articles work in both locales, including the missing-translation notice for entries that exist in only one language. 14 pages currently built; two real featured project entries seeded (`fmodel-mcp` bilingual, `unity-mcp port` EN-only). Next: **Step 7** — Projects index card rendering (Featured cards + Other one-liners), replacing the "coming soon" placeholder.
 
 ---
 
@@ -72,13 +72,28 @@ Verification:
 - `pnpm astro check` and `pnpm build` clean (0/0/0 across 20 files; 10 pages built).
 - Spot-check on the rendered HTML: `/` and `/es/` carry the right bio and locale-correct links, `/contact` exposes the three real handles, both `/now` pages show the right copy + "Last updated" / "Última actualización" footer with `2026-05-09`.
 
-### 6. Dynamic project and article pages — pending
-**Goal:** `/projects/<slug>`, `/articles/<slug>`, and `/es/...` mirrors are generated correctly with the partial-bilingual fallback behavior described in [ARCHITECTURE.md](ARCHITECTURE.md) → "Article and project i18n strategy".
+### 6. Dynamic project and article pages — done
 
-- `src/lib/content.ts` with `getEntryByLocale(collection, slug, locale)` and a helper that produces the union of paths across locales for `getStaticPaths`.
-- `[slug].astro` for projects (featured tier only) and articles, in both `src/pages/` and `src/pages/es/`.
-- `<MissingTranslationNotice />` component used when only the other-locale version exists.
-- **Validation:** Test all four cases manually with stubbed content: (a) entry exists in both locales, (b) only EN, (c) only ES, (d) neither. The "neither" case is a real 404 (not the notice).
+`src/lib/content.ts` exposes `getEntryByLocale(collection, slug, locale)`, `getSlugsByLocaleUnion(collection, filter?)`, `entryIdToParts`, and `isVisible` (drafts hidden in PROD, visible in dev for friction-free authoring).
+
+`src/pages/{,es/}{projects,articles}/[slug].astro` handle the four routes. Each `getStaticPaths` returns the union of slugs across both locales — the page handler then picks one of three branches: render the entry (`ProjectLayout` / `ArticleLayout`), render `<MissingTranslationNotice />` with a link to the available locale, or fall through to a 404 stub (unreachable given the union, but kept for safety).
+
+`src/components/MissingTranslationNotice.astro` composes the localized strings from `src/i18n/ui.ts` (`missing.title` / `missing.body` / `missing.cta`) and uses `localizedPath` to build the cross-locale link.
+
+`src/layouts/ProjectLayout.astro` renders title + meta (year · role) + summary + link list (repo / demo / video / article) + MDX body. `src/layouts/ArticleLayout.astro` renders title + locale-aware date + summary + body. Both pull `Content` from `astro:content`'s `render(entry)`.
+
+Test entries seeded (real, public projects from the featured list):
+
+- `projects/{en,es}/fmodel-mcp.mdx` (bilingual case).
+- `projects/en/unity-mcp-port.mdx` (single-locale case; ES side renders the missing-translation notice).
+
+Aline deliberately not seeded yet per author preference until the project ships.
+
+Verification:
+
+- `pnpm astro check` clean (28 files; 0/0/0).
+- `pnpm build` produces 14 pages including all four `[slug]` cases.
+- Spot-check on built HTML: `/projects/fmodel-mcp` and `/es/projects/fmodel-mcp` render the entry; `/projects/unity-mcp-port` renders the entry; `/es/projects/unity-mcp-port` renders the Spanish "Aún no disponible" notice with the correct title pulled from the EN entry and a link back to the EN page.
 
 ### 7. Project index + cards — pending
 **Goal:** `/projects` lists Featured projects with rich cards and Other projects as compact one-liners. Same structure under `/es/projects`.

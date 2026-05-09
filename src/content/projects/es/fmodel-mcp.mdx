@@ -1,0 +1,14 @@
+---
+title: fmodel-mcp
+summary: Wrapper MCP sobre FModel + CUE4Parse para inspeccionar y exportar assets de Unreal Engine directamente desde Claude. CLI .NET más un servidor MCP en Python, liberado como mi herramienta canónica para trabajar con assets de E33.
+tier: featured
+order: 20
+year: 2026
+role: Autor único
+links:
+  repo: https://github.com/luisep92/fmodel-mcp
+---
+
+Writeup pendiente. El driver fue interno: hacía 30+ consultas a FModel por sesión para el mapa de Aline, y el loop manual de GUI me destrozaba el ritmo. El MCP expone las operaciones que Claude realmente necesita — browse, search, export por clase, dump de materiales — y convierte los "5 minutos por consulta" en una tool call.
+
+El repo es público; una retro completa sobre qué funcionó, qué no, y cómo se asentó la frontera .NET ↔ Python irá aquí cuando lo escriba.

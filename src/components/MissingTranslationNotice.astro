@@ -1,0 +1,37 @@
+---
+import Container from './ui/Container.astro';
+import { localizedPath, t } from '../i18n/utils';
+import type { Locale } from '../i18n/ui';
+import type { CollectionEntry } from 'astro:content';
+
+type AnyEntry = CollectionEntry<'articles'> | CollectionEntry<'projects'>;
+
+interface Props {
+  availableEntry: AnyEntry;
+  availableLocale: Locale;
+  collection: 'articles' | 'projects';
+  slug: string;
+  locale: Locale;
+}
+
+const { availableEntry, availableLocale, collection, slug, locale } = Astro.props;
+const availableUrl = localizedPath(`/${collection}/${slug}`, availableLocale);
+---
+
+<Container class="py-24">
+  <p class="text-xs uppercase tracking-wide text-neutral-500">
+    {t(locale, 'missing.title')}
+  </p>
+  <h1 class="mt-3 text-3xl font-semibold tracking-tight text-neutral-200">
+    {availableEntry.data.title}
+  </h1>
+  <p class="mt-6 leading-relaxed text-neutral-300">
+    {t(locale, 'missing.body')}
+  </p>
+  <a
+    href={availableUrl}
+    class="mt-8 inline-block text-neutral-100 underline-offset-4 hover:underline"
+  >
+    {t(locale, 'missing.cta')} →
+  </a>
+</Container>

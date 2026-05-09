@@ -65,9 +65,10 @@ portfolio_web/
 │   │       └── es/
 │   │           └── <slug>.mdx
 │   ├── components/
-│   │   ├── layout/                     # Header, Footer, LocaleToggle, Container
-│   │   ├── ui/                         # primitives (Link, Heading, Card)
-│   │   └── mdx/                        # components used inside MDX (VideoEmbed, Callout, Figure)
+│   │   ├── layout/                     # Header, Footer, LocaleToggle (chrome that wraps content)
+│   │   ├── ui/                         # primitives (Container, future: Link, Heading, Card)
+│   │   ├── mdx/                        # components used inside MDX (VideoEmbed, Callout, Figure)
+│   │   └── MissingTranslationNotice.astro  # rendered by [slug].astro when only the other-locale version exists
 │   ├── layouts/
 │   │   ├── BaseLayout.astro
 │   │   ├── ArticleLayout.astro
@@ -91,7 +92,8 @@ portfolio_web/
 │   ├── i18n/
 │   │   ├── ui.ts                       # shared UI strings keyed by locale
 │   │   └── utils.ts                    # locale helpers (getLocaleFromUrl, localizedPath, etc.)
-│   ├── lib/                            # general utilities (date formatting, etc.)
+│   ├── lib/
+│   │   └── content.ts                  # getEntryByLocale, getSlugsByLocaleUnion, isVisible (drafts-in-prod)
 │   └── styles/
 │       └── global.css                  # Tailwind base + handful of custom rules
 └── examples/                           # reference docs from the previous project; will be deleted once the harness here is approved
