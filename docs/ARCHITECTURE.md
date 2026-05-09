@@ -46,8 +46,8 @@ portfolio_web/
 │       ├── docs-governance/SKILL.md
 │       └── content-authoring/SKILL.md
 ├── public/                             # static assets served as-is from /
-│   ├── favicon.ico
-│   ├── og-image.png
+│   ├── favicon.svg                     # monogram "LE" on slate-950, served as image/svg+xml
+│   ├── og-default.png                  # 1200×630 social card; default for any page without per-entry coverImage
 │   ├── fonts/                          # self-hosted WOFF2 if we go that route
 │   └── media/
 │       └── projects/                   # videos, posters, screenshots referenced from MDX
@@ -68,6 +68,7 @@ portfolio_web/
 │   │   ├── layout/                     # Header, Footer, LocaleToggle (chrome that wraps content)
 │   │   ├── ui/                         # primitives (Container, future: Link, Heading, Card)
 │   │   ├── mdx/                        # components used inside MDX (VideoEmbed, Callout, Figure)
+│   │   ├── ArticleShareLinks.astro     # share intents (Twitter/LinkedIn/HN) + copy-link, rendered by ArticleLayout above and below the body
 │   │   └── MissingTranslationNotice.astro  # rendered by [slug].astro when only the other-locale version exists
 │   ├── layouts/
 │   │   ├── BaseLayout.astro
@@ -218,6 +219,47 @@ The `[slug].astro` pages return their `getStaticPaths()` from a helper that, for
 
 ---
 
+## SEO and social meta
+
+All `<head>` metadata is centralized in `src/layouts/BaseLayout.astro`. Pages don't inject meta tags directly — they pass props to `BaseLayout` and the layout owns the rendering. Keeping it in one place is what lets us guarantee that every page ships canonical, hreflang, OG, and Twitter tags consistently.
+
+`BaseLayout` props:
+
+| Prop | Type | Default | Used for |
+| --- | --- | --- | --- |
+| `title` | string | `t(locale, 'site.title')` | `<title>`, `og:title`, `twitter:title` |
+| `description` | string | `t(locale, 'site.description')` | `<meta description>`, `og:description`, `twitter:description` |
+| `ogImage` | string (path or URL) | `/og-default.png` | `og:image`, `twitter:image` (resolved against `Astro.site` to absolute URL) |
+| `ogType` | `'website' \| 'article'` | `'website'` | `og:type` |
+| `publishedAt` | `Date` | — | `article:published_time` (only when `ogType="article"`) |
+
+Always rendered (no opt-out):
+
+- `<link rel="canonical">` — built from `Astro.site` + `Astro.url.pathname`. Single canonical per URL is what de-duplicates the `/` ↔ `/es/` pair for search engines.
+- `<link rel="alternate" hreflang>` — three entries: current locale, other locale (computed via `localizedPath`), and `x-default` pointing at the `defaultLocale` version.
+- `<link rel="icon" href="/favicon.svg">` — single SVG favicon, no PNG fallback (modern browsers support SVG favicons; we accept the small tail of older browsers seeing no icon as the cost of not maintaining multiple sizes).
+- Open Graph: `og:title`, `og:description`, `og:url`, `og:type`, `og:image` + `width`/`height`, `og:site_name`, `og:locale`, `og:locale:alternate`.
+- Twitter: `summary_large_image` card with `twitter:title`/`description`/`image`. **No `twitter:site`/`twitter:creator`** by intentional decision — keeping the portfolio identity separate from the personal Twitter (see [DECISIONS.md → "Open decisions"](DECISIONS.md) entry deferring author attribution).
+
+`ArticleLayout` and `ProjectLayout` pass per-entry data:
+
+- `ArticleLayout` → `ogType="article"`, `publishedAt={entry.data.publishedAt}`, `ogImage={entry.data.coverImage}`.
+- `ProjectLayout` → `ogImage={entry.data.coverImage}`. Stays `ogType="website"` (no `publishedAt` on projects).
+
+If an entry has no `coverImage`, the page falls through to `/og-default.png`. That image is the **same handcrafted card for every page without a cover**; per-entry image generation (e.g. `@vercel/og` rendering an OG card per article on demand) is intentionally deferred — see [DECISIONS.md → "Open decisions"](DECISIONS.md).
+
+### Regenerating `og-default.png`
+
+The default OG card is a static PNG screenshotted from a hand-written HTML source. When the accent colour or wordmark changes (Step 14 of [NEXT_STEPS.md](NEXT_STEPS.md)), regenerate it:
+
+1. Edit the HTML source (kept under `scripts/og-default.html` if/when we promote it; currently inlined in the commit that introduced the file).
+2. Run a one-off Playwright screenshot at `1200×630` viewport, no `deviceScaleFactor`, output to `public/og-default.png`.
+3. Commit the new PNG. Don't worry about historical image versions — the live URL serves the current commit's asset.
+
+Regeneration is rare (single-digit times in the project's life). Worth scripting only if it becomes routine.
+
+---
+
 ## MDX components
 
 Components available inside MDX bodies are exposed via the `components` prop on `<Content />`, populated from `src/components/mdx/index.ts`. They render with no explicit import in MDX. Current set:
@@ -248,7 +290,8 @@ To add a new MDX component:
 - **Build**: `pnpm build` → static output in `dist/`.
 - **Preview a build**: `pnpm preview` → serve `dist/` locally (sanity check before pushing).
 - **Deploy**: GitHub → Vercel, automatic on push to `main`. Pull requests get preview URLs automatically.
-- **Environment variables**: `.env.example` documents the keys. Real values live in Vercel project settings, never in the repo. There are no required env vars at v1; this slot is reserved for future use (analytics tokens, etc.).
+- **Environment variables**: `.env.example` documents the keys. Real values live in Vercel project settings, never in the repo. There are no required env vars at v1; this slot is reserved for future use.
+- **Analytics**: [`@vercel/analytics`](https://www.npmjs.com/package/@vercel/analytics) (the `/astro` entrypoint) is mounted once in `BaseLayout` with `mode={import.meta.env.PROD ? 'production' : 'development'}` — local dev doesn't pollute the dashboard. Default pageview tracking only; no custom events. Privacy-clean by default (no cookies, no PII). Rationale in [DECISIONS.md → "Analytics"](DECISIONS.md). Speed Insights (real-user web vitals) is intentionally not added here — performance work is scoped to Step 15 of [NEXT_STEPS.md](NEXT_STEPS.md).
 
 ---
 
