@@ -4,9 +4,12 @@ import LocaleToggle from './LocaleToggle.astro';
 import { getLocaleFromUrl, localizedPath, t } from '../../i18n/utils';
 
 const locale = getLocaleFromUrl(Astro.url);
-const currentPath = Astro.url.pathname;
+// Astro emits trailing slashes on sub-routes; normalize so the active-match
+// comparison below treats `/projects` and `/projects/` as the same path.
+const currentPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
 const navItems = [
+  { key: 'nav.home' as const, basePath: '/' },
   { key: 'nav.projects' as const, basePath: '/projects' },
   { key: 'nav.articles' as const, basePath: '/articles' },
   { key: 'nav.now' as const, basePath: '/now' },
@@ -15,6 +18,11 @@ const navItems = [
 
 function isActive(basePath: string): boolean {
   const localizedBase = localizedPath(basePath, locale);
+  // Home is exact-match only — otherwise the startsWith check below would
+  // light it up on every page (`/es/projects` startsWith `/es/`...).
+  if (basePath === '/') {
+    return currentPath === localizedBase;
+  }
   return currentPath === localizedBase || currentPath.startsWith(localizedBase + '/');
 }
 ---
