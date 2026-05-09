@@ -190,6 +190,7 @@ The ambient bg texture is a new open sub-decision added during Step 11's polish 
 - Contrast checked against the chosen accent.
 - Keyboard navigation works for header, locale toggle, project cards, article links.
 - `prefers-reduced-motion` respected.
+- **Mobile responsive review** at iPhone SE (375px) and iPhone 13 (390px) viewports across `/`, `/projects`, `/articles`, `/now`, `/contact` and a representative article + project: no horizontal overflow, table reflow, code block scrolling within `<pre>`, font sizes legible, tap targets ≥ 44px, share links wrap correctly. Header was quick-fixed during Step 12 to stack vertically below `sm:` (640px); other surfaces should be re-verified here.
 - **Validation:** numbers from a clean Lighthouse run committed in `docs/my-notes.md` or as a launch-retrospective section here.
 
 ---
