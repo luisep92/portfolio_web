@@ -1,0 +1,21 @@
+---
+/**
+ * Image with caption inside MDX.
+ *
+ * - `src` is a path under `/public/media/...` (or an external URL).
+ * - `alt` is required for accessibility; describe what's in the image.
+ * - `caption` is shown to readers below the image.
+ */
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+const { src, alt, caption } = Astro.props;
+---
+
+<figure class="my-8">
+  <img src={src} alt={alt} loading="lazy" decoding="async" class="w-full rounded" />
+  {caption && <figcaption class="mt-2 text-sm text-slate-400">{caption}</figcaption>}
+</figure>

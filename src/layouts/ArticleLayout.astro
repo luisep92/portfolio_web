@@ -3,6 +3,7 @@ import { render, type CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import Container from '../components/ui/Container.astro';
 import { getLocaleFromUrl } from '../i18n/utils';
+import { mdxComponents } from '../components/mdx';
 
 interface Props {
   entry: CollectionEntry<'articles'>;
@@ -31,7 +32,7 @@ const updated = entry.data.updatedAt ? formatter.format(entry.data.updatedAt) : 
     <p class="mt-6 text-lg leading-relaxed text-slate-300">{entry.data.description}</p>
 
     <article class="mt-12 leading-relaxed text-slate-200 [&>p]:mt-6 [&>h2]:mt-12 [&>h2]:text-2xl [&>h2]:font-semibold">
-      <Content />
+      <Content components={mdxComponents} />
     </article>
   </Container>
 </BaseLayout>

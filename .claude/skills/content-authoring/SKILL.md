@@ -128,9 +128,9 @@ A small contextual aside that doesn't belong in the main flow.
 
 Conventions:
 
-- `<VideoEmbed />` accepts either a self-hosted `src` (under `/public/media/...`) or a YouTube/Vimeo URL. Always set `poster` for self-hosted videos so the page doesn't pop on load. Reduced-motion users see the poster only until they explicitly play.
-- `<Callout kind>` accepts `note`, `warn`, or `aside`. Use `warn` sparingly — it's loud.
-- `<Figure>` requires `src` and `caption`. The caption is shown to the reader and used as the image's alt-equivalent.
+- `<VideoEmbed />` accepts either a self-hosted `src` (under `/public/media/...`) or a YouTube/Vimeo URL. For self-hosted videos always set `poster` so the page doesn't pop on load — the underlying `<video>` uses `preload="none"` so the file only fetches when the reader plays it. Reduced-motion users see the poster until they explicitly play; no autoplay or loop.
+- `<Callout kind>` accepts `note` (default) or `aside`. A `warn` variant is intentionally deferred until the accent color in DECISIONS.md is closed — until then, emphasis goes through `note` + bold/italic inline.
+- `<Figure>` requires `src` and `alt`; `caption` is optional. `alt` describes what's in the image (a11y); `caption` is shown to readers below.
 
 To add a new MDX component:
 

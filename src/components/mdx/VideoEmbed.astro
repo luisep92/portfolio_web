@@ -1,0 +1,61 @@
+---
+/**
+ * Embed a video inside MDX content.
+ *
+ * - Self-hosted: pass `src` as a path under `/public/media/...` plus a `poster`
+ *   image. The video uses `preload="none"` so the file is only fetched when
+ *   the user actually plays it (lazy by behaviour, not by attribute).
+ * - External: pass `src` as a YouTube or Vimeo URL. Rendered as a lazy iframe
+ *   pointed at the privacy-friendly embed origin (`youtube-nocookie.com`).
+ *
+ * `prefers-reduced-motion` is respected by default — no autoplay, no loop.
+ */
+interface Props {
+  src: string;
+  poster?: string;
+  alt?: string;
+  caption?: string;
+}
+
+const { src, poster, alt, caption } = Astro.props;
+
+const isYouTube = /youtube\.com|youtu\.be/.test(src);
+const isVimeo = /vimeo\.com/.test(src);
+const isExternal = isYouTube || isVimeo;
+
+function youTubeEmbedUrl(url: string): string {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]+)/);
+  return match ? `https://www.youtube-nocookie.com/embed/${match[1]}` : url;
+}
+
+function vimeoEmbedUrl(url: string): string {
+  const match = url.match(/vimeo\.com\/(\d+)/);
+  return match ? `https://player.vimeo.com/video/${match[1]}` : url;
+}
+
+const embedUrl = isYouTube ? youTubeEmbedUrl(src) : isVimeo ? vimeoEmbedUrl(src) : src;
+const titleText = alt ?? caption ?? 'Embedded video';
+---
+
+<figure class="my-8">
+  {
+    isExternal ? (
+      <div class="aspect-video w-full overflow-hidden rounded">
+        <iframe
+          src={embedUrl}
+          title={titleText}
+          loading="lazy"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          class="h-full w-full"
+        />
+      </div>
+    ) : (
+      <video controls preload="none" poster={poster} class="w-full rounded">
+        <source src={src} />
+        {alt && <p>{alt}</p>}
+      </video>
+    )
+  }
+  {caption && <figcaption class="mt-2 text-sm text-slate-400">{caption}</figcaption>}
+</figure>

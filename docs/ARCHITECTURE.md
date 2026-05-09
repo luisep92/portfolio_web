@@ -220,20 +220,21 @@ The `[slug].astro` pages return their `getStaticPaths()` from a helper that, for
 
 ## MDX components
 
-Components available inside MDX bodies are exposed through Astro's MDX integration. Initial set:
+Components available inside MDX bodies are exposed via the `components` prop on `<Content />`, populated from `src/components/mdx/index.ts`. They render with no explicit import in MDX. Current set:
 
 | Component | File | Purpose |
 |---|---|---|
-| `<VideoEmbed />` | `src/components/mdx/VideoEmbed.astro` | Self-hosted or YouTube/Vimeo video with poster image, lazy load, and reduced-motion respect. |
-| `<Callout />` | `src/components/mdx/Callout.astro` | Inline highlighted block: `note`, `warn`, `aside`. |
-| `<Figure />` | `src/components/mdx/Figure.astro` | Image with caption, sourced from `/public/media/...`. |
+| `<VideoEmbed />` | `src/components/mdx/VideoEmbed.astro` | Self-hosted (`<video preload="none">` + `poster`) or YouTube/Vimeo (lazy iframe to the privacy-friendly embed origin). `prefers-reduced-motion` respected by default — no autoplay, no loop. |
+| `<Callout />` | `src/components/mdx/Callout.astro` | Inline highlighted block. `kind`: `note` (default, slate-tinted) or `aside` (quieter, left-rule only). A `warn` variant is intentionally deferred until the accent color in DECISIONS.md is closed — adding amber/red would step on the single-accent rule. |
+| `<Figure />` | `src/components/mdx/Figure.astro` | Image with required `alt` and optional `caption`, lazy-loaded. |
+
+The map is wired into both `src/layouts/ProjectLayout.astro` and `src/layouts/ArticleLayout.astro` via `<Content components={mdxComponents} />`.
 
 To add a new MDX component:
 
 1. Create the `.astro` file under `src/components/mdx/`.
-2. Add it to the `components` map exported from `src/components/mdx/index.ts`.
-3. Pass that map into `<Content components={mdxComponents} />` in the layouts that render MDX (`ArticleLayout`, `ProjectLayout`).
-4. Document the new component in this section and in [`content-authoring`](../.claude/skills/content-authoring/SKILL.md).
+2. Add it to the `mdxComponents` object exported from `src/components/mdx/index.ts`.
+3. Document it in this section and in [`content-authoring`](../.claude/skills/content-authoring/SKILL.md) → "MDX components in content" — same commit per docs-governance.
 
 ---
 

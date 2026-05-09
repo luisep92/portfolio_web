@@ -1,0 +1,24 @@
+---
+/**
+ * Inline highlighted block inside MDX.
+ *
+ * Two kinds today: `note` (default, slate-tinted) and `aside` (quieter,
+ * left-rule only). A `warn` variant is intentionally deferred until the
+ * accent color in DECISIONS.md is closed — adding a second strong color
+ * (amber/red) would step on the single-accent rule.
+ */
+interface Props {
+  kind?: 'note' | 'aside';
+}
+
+const { kind = 'note' } = Astro.props;
+
+const styles = {
+  note: 'border-slate-700 bg-slate-900/40 text-slate-200',
+  aside: 'border-slate-800 bg-transparent text-slate-300',
+} as const;
+---
+
+<div class:list={['my-6 rounded border-l-2 px-4 py-3 leading-relaxed', styles[kind]]}>
+  <slot />
+</div>

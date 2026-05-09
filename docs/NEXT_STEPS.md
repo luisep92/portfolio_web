@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: scaffolding.** Docs harness in place. **Steps 1–7 complete**: full static + dynamic page pipeline, with project listing and detail pages live. Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; `pnpm build` clean. Content collections, i18n plumbing, BaseLayout chrome, missing-translation fallback, project index cards (Featured + Other sections), all working in both locales. Header nav now includes Home alongside Projects/Articles/Now/Contact. 14 pages currently built; two featured project entries seeded (`fmodel-mcp`, `unity-mcp port`). Next: **Step 8** — MDX components (`<VideoEmbed />`, `<Callout />`, `<Figure />`) wired into the rendering pipeline.
+**Phase: scaffolding.** Docs harness in place. **Steps 1–8 complete**: full static + dynamic page pipeline, with project listing, detail pages, and MDX component library all live. Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; slate base palette (DECISIONS.md). Content collections, i18n plumbing, BaseLayout chrome, missing-translation fallback, project index cards, and three MDX components (`VideoEmbed`, `Callout`, `Figure`) wired into both `ProjectLayout` and `ArticleLayout`. Header nav includes Home. 14 pages built; two featured project entries seeded with `fmodel-mcp` already exercising the Callout component. Next: **Step 9** — first real content for the Aline featured project (depending on author having a video and writeup available).
 
 ---
 
@@ -109,12 +109,17 @@ Verification:
 - `pnpm build` produces 14 pages.
 - Spot-check on built HTML: `/projects` lists both `fmodel-mcp` and `unity-mcp port` under "Featured"; `/es/projects` lists only `fmodel-mcp` under "Destacados" (unity-mcp-port has no ES entry; users hitting `/es/projects/unity-mcp-port` directly still get the missing-translation notice from Step 6).
 
-### 8. MDX components — pending
-**Goal:** `<VideoEmbed />`, `<Callout />`, `<Figure />` exist and are wired into the MDX rendering pipeline.
+### 8. MDX components — done
 
-- Lazy-load + poster image for `VideoEmbed`. `prefers-reduced-motion` respected (no autoplay loop when set).
-- Components mapped through `src/components/mdx/index.ts`.
-- **Validation:** A stub article and a stub featured-project page render the components correctly. Document each new component in [ARCHITECTURE.md](ARCHITECTURE.md) → "MDX components" and in [`content-authoring`](../.claude/skills/content-authoring/SKILL.md).
+`src/components/mdx/{VideoEmbed,Callout,Figure}.astro` exist and are exported as a `mdxComponents` map from `src/components/mdx/index.ts`. Both `ProjectLayout` and `ArticleLayout` pass that map to `<Content components={mdxComponents} />`, so MDX files can use the components without explicit imports.
+
+- **VideoEmbed**: detects YouTube / Vimeo URLs and renders a lazy iframe pointing at the privacy-friendly embed origin (`youtube-nocookie.com`); for self-hosted sources, renders a `<video controls preload="none">` so the file only fetches on play. `prefers-reduced-motion` is respected by default (no autoplay, no loop).
+- **Callout**: two kinds — `note` (default, slate-tinted) and `aside` (quieter, left-rule only). `warn` is **deliberately deferred** until the accent color in DECISIONS.md closes; adding amber/red here would step on the single-accent rule.
+- **Figure**: lazy-loaded image with required `alt` and optional `caption`.
+
+Validation: pnpm build clean (32 files in check, 14 pages). The `fmodel-mcp` project entry now wraps its closing meta-paragraph in `<Callout kind="aside">…</Callout>` (EN + ES) — the rendered HTML on `/projects/fmodel-mcp` and `/es/projects/fmodel-mcp` shows the slate-800 left-rule + slate-300 text styling, confirming the wiring end-to-end.
+
+Docs in same commit: ARCHITECTURE.md → "MDX components" updated with the deferred-warn note and the new "wired into both layouts" line; content-authoring skill conventions match (warn dropped from the kind list).
 
 ### 9. First real content: Aline featured project (EN) — pending
 **Goal:** `/projects/aline` is live with the embedded video, the narrative, and links to the repo + article (if applicable).
