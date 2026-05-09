@@ -39,7 +39,9 @@
       "Bash(git -C /home/luis/Projects/portfolio_web log --oneline -1)",
       "Bash(git -C /home/luis/Projects/portfolio_web rev-parse --abbrev-ref @{upstream})",
       "Bash(git -C /home/luis/Projects/portfolio_web remote -v)",
-      "Bash(git -C /home/luis/Projects/portfolio_web add vercel.json docs/ARCHITECTURE.md .claude/settings.json)"
+      "Bash(git -C /home/luis/Projects/portfolio_web add vercel.json docs/ARCHITECTURE.md .claude/settings.json)",
+      "Bash(ls /home/luis/.cache/ms-playwright/ 2>&1 | head -10)",
+      "Read(//home/luis/.cache/ms-playwright/**)"
     ]
   }
 }

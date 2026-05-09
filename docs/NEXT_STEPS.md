@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: scaffolding.** Docs harness in place. **Steps 1–8 complete**: full static + dynamic page pipeline, with project listing, detail pages, and MDX component library all live. Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; slate base palette (DECISIONS.md). Content collections, i18n plumbing, BaseLayout chrome, missing-translation fallback, project index cards, and three MDX components (`VideoEmbed`, `Callout`, `Figure`) wired into both `ProjectLayout` and `ArticleLayout`. Header nav includes Home. 14 pages built; two featured project entries seeded with `fmodel-mcp` already exercising the Callout component. Next: **Step 9** — first real content for the Aline featured project (depending on author having a video and writeup available).
+**Phase: scaffolding done, content + deploy next.** **Steps 1–9 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, **plus security headers (`vercel.json`) and an e2e test layer (Playwright + Chromium, 11 specs covering nav / locale toggle / projects / partial-bilingual / contact / Callout, all green in ~4 s)**. Aline writeup deferred until that project ships (moved to deferred / nice-to-haves). Next: **Step 10** — push to GitHub and deploy to Vercel; this unlocks a real URL to evaluate the still-open visual decisions against. After deploy: first article, then projects pass.
 
 ---
 
@@ -121,73 +121,85 @@ Validation: pnpm build clean (32 files in check, 14 pages). The `fmodel-mcp` pro
 
 Docs in same commit: ARCHITECTURE.md → "MDX components" updated with the deferred-warn note and the new "wired into both layouts" line; content-authoring skill conventions match (warn dropped from the kind list).
 
-### 9. First real content: Aline featured project (EN) — pending
-**Goal:** `/projects/aline` is live with the embedded video, the narrative, and links to the repo + article (if applicable).
+### 9. Hardening — CSP + e2e tests — done
 
-- Source video and poster from the existing project; place under `/public/media/projects/aline/`.
-- Narrative drafted in `src/content/projects/en/aline.mdx`.
-- **Validation:** Page reads cleanly end-to-end; video plays; links resolve. ES side renders the "not yet available in this language" notice with a link to the EN page (until the ES version is written).
+`vercel.json` ships a tight Content-Security-Policy plus the standard hygiene headers (`X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` denying camera / mic / geo / payment). `frame-src` allowlist is limited to the YouTube + Vimeo embed origins used by `<VideoEmbed />`; everything else defaults to `'self'`. Detail in [ARCHITECTURE.md → "Security posture"](ARCHITECTURE.md). CSP only applies on Vercel — verify post-deploy with `curl -I https://<url>`.
 
-### 10. First real content: Claude Code guide article (EN) — pending
-**Goal:** `/articles/<slug>` is live with the adapted version of Luis's Claude Code guide.
+E2E test layer: Playwright + Chromium. Specs under `tests/e2e/` cover home (EN + ES), header nav + locale toggle (including a regression test for the greedy-active-state bug fixed in `1a5dd5f`), projects index + detail navigation, the partial-bilingual fallback notice on `/es/projects/unity-mcp-port`, contact handles, and the MDX `<Callout>` rendering inside `fmodel-mcp`. 11 tests, ~4 s on a clean run. `pnpm test:e2e` does build + preview + run from a clean clone. Setup notes in [ARCHITECTURE.md → "Testing"](ARCHITECTURE.md).
 
-- Adapt the existing draft into MDX, with code blocks and a few `<Callout />` insertions where they help.
+CI workflow at `.github/workflows/e2e.yml` runs the suite on every push and PR.
+
+### 10. Deploy to Vercel — pending
+
+**Goal:** `main` is wired to Vercel; PRs produce preview URLs; the production URL is canonical.
+
+- `git push origin main` — the GitHub remote `git@github.com:luisep92/portfolio_web.git` already exists; the local commits just haven't been pushed yet.
+- Connect the GitHub repo to a new Vercel project. Astro is auto-detected; no extra build config beyond the existing `vercel.json`.
+- Update `astro.config.mjs` `site` from the `https://example.com` placeholder to the real URL once it's known (default `*.vercel.app` is fine for v1; custom domain is a deferred decision).
+- After first deploy: `curl -I https://<url>` and confirm `Content-Security-Policy`, `X-Content-Type-Options`, etc. land in the response.
+- Smoke-test the same surface the e2e tests cover, against the production URL.
+- **Validation:** a trivial PR produces a preview URL; merging it updates production; the security headers from `vercel.json` are visible in the live response.
+
+### 11. First real content: AI / Claude Code article (EN) — pending
+
+**Goal:** `/articles/<slug>` is live with one of the two AI articles already drafted by Luis (the Claude Code workflow guide *or* the "secured environment for Claude Code" piece — pick whichever is more refined). The second article follows in a separate iteration.
+
+- Adapt the chosen draft into MDX. Use `<Callout />` where it earns its space; don't sprinkle it.
 - Index card on `/articles` with description and date.
-- **Validation:** Article reads end-to-end; all anchors and links resolve; ES side shows the partial-content notice.
+- Add an e2e spec exercising the article route + missing-translation fallback on the ES side until that translation lands.
+- **Validation:** article reads end-to-end; all anchors and links resolve; `pnpm test:e2e` includes the new spec and stays green.
 
-### 11. Other projects — pending
-**Goal:** Compact cards for the remaining "other" projects (Hollow Knight mods, Bisbot, NEAT, EasyAvahi, rankedle), and stubs for the remaining featured (`fmodel-mcp`, `unity-mcp port`, brief mention of María/Opositia per the public-repo decision).
+### 12. Other projects + remaining featured stubs — pending
 
-- One MDX per project, frontmatter only for "other" cards (no body needed at v1).
-- For featured stubs: minimal narrative + a "writeup pending" banner is acceptable, per [PRODUCT.md](PRODUCT.md) → "Scope (v1)".
-- **Validation:** Index lists all entries in the right tier and order. Links resolve.
+**Goal:** Compact cards for "other" projects (Hollow Knight mods, Bisbot, NEAT, EasyAvahi, rankedle), and stubs for any featured we haven't filled yet (María / Opositia per the public-repo decision; optionally this site itself with the meta angle). Author does a GitHub-pass first to decide which projects get in and at what tier.
 
-### 12. Close open visual decisions — pending
-**Goal:** Accent color, typography, and the "one moment of character" picked. Each closed entry moves from [DECISIONS.md → Open](DECISIONS.md) into the body of the doc.
+- One MDX per project, frontmatter only for "other" cards (body ignored at render time per Step 6 / Step 7).
+- For featured stubs: minimal narrative + "writeup pending" banner is acceptable, per [PRODUCT.md](PRODUCT.md) → "Scope (v1)".
+- **Validation:** index lists all entries in the right tier and order; new e2e spec asserts the Other section renders when populated.
 
-- Prototype each candidate against a real page; don't decide on swatches alone.
+### 13. Close open visual decisions — pending
+
+**Goal:** Accent color, typography, and the "one moment of character" picked. Each closed entry moves from [DECISIONS.md → Open](DECISIONS.md) into the body of the doc. Closing the accent unblocks the deferred `<Callout kind="warn">` variant from Step 8.
+
+- Prototype each candidate against a real page (likely against the deployed production URL post-Step 10); don't decide on swatches alone.
 - Closing the moment of character means it's implemented, not just chosen.
-- **Validation:** DECISIONS.md no longer lists these as open; the site visually reflects the choice.
+- **Validation:** DECISIONS.md no longer lists these as open; the site visually reflects the choice; e2e spec for any new interactive moment added.
 
-### 13. Lighthouse + accessibility pass — pending
-**Goal:** Lighthouse performance ≥ 90 on the home page (with the video) and on a representative article. A11y issues from a manual pass and from `axe` are addressed or deferred with a written note.
+### 14. Lighthouse + accessibility pass — pending
+
+**Goal:** Lighthouse performance ≥ 90 on the home page (with any embedded video) and on a representative article. A11y issues from a manual pass and from `axe` are addressed or deferred with a written note.
 
 - Cover image and video poster sized correctly; lazy-load verified.
 - Contrast checked against the chosen accent.
 - Keyboard navigation works for header, locale toggle, project cards, article links.
 - `prefers-reduced-motion` respected.
-- **Validation:** Numbers from a clean Lighthouse run committed in `docs/my-notes.md` or as a section in NEXT_STEPS for the launch retrospective.
-
-### 14. Deploy to Vercel — pending
-**Goal:** `main` is wired to Vercel; PRs produce preview URLs; production URL is the canonical link.
-
-- Vercel project created; build command and output dir confirmed.
-- Domain configuration: at minimum the default `*.vercel.app`; custom domain is a separate decision.
-- **Validation:** A trivial PR produces a preview URL; merging it updates the production URL.
+- **Validation:** numbers from a clean Lighthouse run committed in `docs/my-notes.md` or as a launch-retrospective section here.
 
 ---
 
 ## Side projects / nice-to-haves (deferred)
 
-- Full ES translations of all featured project narratives and the launch article.
+- **Aline featured project writeup** — blocked on Luis's project shipping plus video assembly. When unblocked: add full narrative + `<VideoEmbed />` to `src/content/projects/{en,es}/aline-boss-fight.mdx`, set `tier: 'featured'`, drop the entry into `/projects` listing, add an e2e spec exercising the video poster + lazy load.
+- Second AI article (the "secured environment for Claude Code" piece — limit git, mock secrets, kernel limitations) once Step 11 lands the first one.
+- Full ES translations of all featured project narratives and the launch articles.
 - Additional articles.
 - RSS feed for `/articles`.
-- Custom domain.
+- Custom domain (separate from Step 10's free `*.vercel.app`).
 - Analytics (decision still open in [DECISIONS.md](DECISIONS.md)).
 - Open Graph image generation per article/project (vs. one shared OG image).
-- Playwright tooling — likely [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp) at user level for Claude's visual verification + a project-level Playwright install for actual e2e tests. Pulls in around Step 11–13 (visual pass / Lighthouse / a11y) when there's something worth looking at.
+- [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp) at user level for Claude's visual verification across projects (the project-level Playwright install for e2e tests landed in Step 9; the MCP layer is the separate "Claude can see the rendered page during dev" capability).
 
 ---
 
 ## Open design decisions blocking specific steps
 
-These are tracked in [DECISIONS.md → Open](DECISIONS.md). Listed here so the dependency on Step 12 is visible:
+These are tracked in [DECISIONS.md → Open](DECISIONS.md). Listed here so the dependency on Step 13 is visible:
 
-- Accent color — blocks Step 12 closing.
-- Typography — blocks Step 4 visual finalization and Step 12.
-- Moment of character on home — blocks Step 5 home finalization and Step 12.
-- Font hosting — depends on the typography pick; blocks Step 4 final.
-- Analytics — defaults to none for v1; can be revisited post-launch without blocking Step 14.
+- Accent color — blocks Step 13 closing and the deferred `<Callout kind="warn">` from Step 8.
+- Typography — blocks Step 13.
+- Moment of character on home — blocks Step 13.
+- Font hosting — depends on the typography pick; blocks Step 13.
+- Analytics — defaults to none for v1; can be revisited post-launch without blocking Step 10.
 
 ---
 

@@ -248,6 +248,30 @@ To add a new MDX component:
 
 ---
 
+## Testing
+
+End-to-end tests live under `tests/e2e/<area>.spec.ts` and cover the user-visible surface: nav, locale toggle, project listing, partial-bilingual fallback, contact handles, MDX rendering. Stack is [Playwright](https://playwright.dev) (`@playwright/test`), Chromium-only by default. Config in [`playwright.config.ts`](../playwright.config.ts).
+
+```sh
+pnpm test:e2e        # headless run
+pnpm test:e2e:ui     # interactive UI mode for debugging
+```
+
+The `webServer` config does `pnpm build && pnpm preview` automatically, so a single `pnpm test:e2e` works from a clean clone — no need to start the server manually.
+
+First-time setup on a new machine: `pnpm exec playwright install chromium` to download the browser binary (~150MB to `~/.cache/ms-playwright/`, not committed).
+
+**Conventions**:
+
+- One spec per area of behaviour. Cover both EN and ES paths when they differ.
+- Regression tests for fixed bugs reference the fixing commit in a code comment (see `tests/e2e/nav.spec.ts` → "greedy active-state" test pointing at commit `1a5dd5f`).
+- Use `getByRole` / `getByLabel` / `getByText` over CSS selectors when possible; the test reads like the user's mental model.
+- For pages that exist in both locales, pin the test on locale-specific copy or `<html lang>` so a regression in routing is caught.
+
+Test artifacts (`test-results/`, `playwright-report/`, `playwright/.cache/`, `blob-report/`) are gitignored. The HTML report is generated on failure; in CI it's uploaded as a workflow artifact.
+
+---
+
 ## Security posture
 
 Static site on Vercel — minimal attack surface. What's configured:

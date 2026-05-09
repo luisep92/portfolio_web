@@ -35,3 +35,9 @@ yarn.lock
 
 # Local Claude Code settings (per-machine)
 .claude/settings.local.json
+
+# Playwright e2e test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
