@@ -8,13 +8,13 @@ How the portfolio is built, organized, deployed, and recovered. Operational refe
 
 | Layer | Choice | Why (one line; full rationale in [DECISIONS.md](DECISIONS.md) → "Stack") |
 |---|---|---|
-| Framework | Astro | Static-first, MDX as a first-class citizen, light interactivity where needed. |
-| Styling | Tailwind | Utilities map directly to the visual restrictions in DECISIONS, no design drift. |
-| Long-form content | MDX | Articles and featured-project narratives can embed components like `<VideoEmbed />`. |
-| Application code | TypeScript | Default; no benefit to opting out at this size. |
+| Framework | Astro 6.x | Static-first, MDX as a first-class citizen, light interactivity where needed. |
+| Styling | Tailwind v4 (via `@tailwindcss/vite`) | Utilities map directly to the visual restrictions in DECISIONS, no design drift. v4 config is CSS-based — no separate `tailwind.config.*` file; tokens live under `@theme` in `src/styles/global.css`. |
+| Long-form content | MDX (`@astrojs/mdx`) | Articles and featured-project narratives can embed components like `<VideoEmbed />`. |
+| Application code | TypeScript (strict) | Default; no benefit to opting out at this size. `tsconfig.json` extends `astro/tsconfigs/strict`. |
 | Hosting | Vercel | Lowest-friction Astro deploy; PR previews without configuration. |
-| Package manager | pnpm | Fast, content-addressable store; lockfile is the source of truth for dep versions. |
-| Node runtime | Latest LTS at time of setup | Pinned via `package.json` `engines` and `.nvmrc`. |
+| Package manager | pnpm 11.x | Fast, content-addressable store; `pnpm-lock.yaml` is the source of truth for dep versions. Build scripts that need to run install hooks (`esbuild`, `sharp`) are allowlisted in `pnpm-workspace.yaml` under `allowBuilds` — pnpm 11 reads this file even outside a monorepo. |
+| Node runtime | Node 22 LTS | Pinned via `package.json` `engines` and `.nvmrc`. Required by Astro 6 and pnpm 11. |
 
 Versioned facts (Astro version, Tailwind version, exact Node line) live in `package.json` and `pnpm-lock.yaml` — those files are the source of truth, not this document.
 
@@ -28,8 +28,8 @@ portfolio_web/
 ├── README.md                           # public-facing intro
 ├── package.json
 ├── pnpm-lock.yaml
+├── pnpm-workspace.yaml                 # pnpm 11 settings (allowBuilds for esbuild/sharp); not a monorepo
 ├── astro.config.mjs
-├── tailwind.config.mjs
 ├── tsconfig.json
 ├── .nvmrc                              # pins Node version
 ├── .gitignore

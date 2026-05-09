@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+.output/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Vercel local CLI
+.vercel/
+
+# Other package managers (we use pnpm)
+package-lock.json
+yarn.lock
+
+# Local Claude Code settings (per-machine)
+.claude/settings.local.json

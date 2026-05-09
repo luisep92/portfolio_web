@@ -6,21 +6,21 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: docs-first harness.** Five docs (`CLAUDE.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/NEXT_STEPS.md`) and `docs/my-notes.md` exist. Two skills exist (`docs-governance`, `content-authoring`). No code yet — `package.json`, `astro.config.mjs`, and `src/` are not present. The next step (Step 1 below) is the first scaffold.
-
-The `examples/` folder still contains the reference docs from the previous project. Delete it as the *last* action of this phase, after the harness above is approved.
+**Phase: scaffolding.** Docs harness in place. **Step 1 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap installed on Node 22, `pnpm build` produces `dist/` cleanly with sitemap. Minimal `src/pages/index.astro` placeholder ("Site under construction") rendering. Next: **Step 2** — define content collection schemas for `articles` and `projects`.
 
 ---
 
 ## Steps
 
-### 1. Scaffold the Astro project — pending
-**Goal:** `pnpm dev` runs and serves an empty Astro page at `/`.
+### 1. Scaffold the Astro project — done
 
-- Init with the official Astro starter, TypeScript strict mode, Tailwind, MDX integration, sitemap, prefetch.
-- Add `.nvmrc`, `.gitignore` (Astro defaults + `.env`), `.env.example`.
-- Configure `astro.config.mjs` `i18n`: `defaultLocale: 'en'`, `locales: ['en', 'es']`, `routing.prefixDefaultLocale: false`.
-- **Validation:** `pnpm install && pnpm dev` opens an Astro page; `pnpm build` produces `dist/` without errors. Update [ARCHITECTURE.md](ARCHITECTURE.md) → "Stack" with the actual versions installed in the same commit.
+Manual scaffold (no Astro starter — every file decided): `package.json`, `pnpm-lock.yaml`, `astro.config.mjs` (with `i18n: { defaultLocale: 'en', locales: ['en','es'], routing.prefixDefaultLocale: false }`), `tsconfig.json` (extends `astro/tsconfigs/strict`), `src/styles/global.css` (`@import "tailwindcss"`), `src/pages/index.astro` placeholder. `.nvmrc` pinning Node 22, `.gitignore`, `.env.example` already in place.
+
+Notes from execution:
+
+- pnpm 11 ignores install scripts by default. `pnpm approve-builds --all` writes `esbuild` and `sharp` into `pnpm-workspace.yaml` under `allowBuilds:` — that's the canonical location in pnpm 11, even outside a monorepo. The `pnpm.onlyBuiltDependencies` field in `package.json` is a leftover from pnpm 10 docs and is ignored; do not use it.
+- Tailwind v4 changes the integration: no `tailwind.config.*` file; theme tokens go under `@theme` in CSS. The `@astrojs/tailwind` integration is deprecated — using `@tailwindcss/vite` plugin instead. ARCHITECTURE.md updated to reflect this.
+- `site:` in `astro.config.mjs` is the `https://example.com` placeholder until the domain is decided ([DECISIONS.md → Open](DECISIONS.md)).
 
 ### 2. Define content collection schemas — pending
 **Goal:** `src/content/config.ts` contains Zod schemas for `articles` and `projects` matching the table in [ARCHITECTURE.md](ARCHITECTURE.md) → "Content collections".
@@ -127,6 +127,7 @@ The `examples/` folder still contains the reference docs from the previous proje
 - Custom domain.
 - Analytics (decision still open in [DECISIONS.md](DECISIONS.md)).
 - Open Graph image generation per article/project (vs. one shared OG image).
+- Playwright tooling — likely [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp) at user level for Claude's visual verification + a project-level Playwright install for actual e2e tests. Pulls in around Step 11–13 (visual pass / Lighthouse / a11y) when there's something worth looking at.
 
 ---
 

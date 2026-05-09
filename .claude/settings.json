@@ -4,7 +4,21 @@
       "Bash(git -C /home/luis/Projects/portfolio_web log --oneline -20)",
       "Bash(git -C /home/luis/Projects/portfolio_web status)",
       "Edit(/.claude/skills/docs-governance/**)",
-      "Edit(/.claude/skills/content-authoring/**)"
+      "Edit(/.claude/skills/content-authoring/**)",
+      "Bash(pnpm --version)",
+      "Bash(corepack --version)",
+      "Bash(corepack enable *)",
+      "Bash(corepack prepare *)",
+      "Read(//home/luis/.nvm/versions/node/**)",
+      "Bash(bash -lc 'nvm ls 2>&1 | head -20')",
+      "Bash(git -C /home/luis/Projects/portfolio_web diff --stat)",
+      "Bash(git -C /home/luis/Projects/portfolio_web diff --cached --stat)",
+      "Bash(git -C /home/luis/Projects/portfolio_web log --oneline -10)",
+      "Bash(git -C /home/luis/Projects/portfolio_web diff .claude/settings.json)",
+      "Bash(git -C /home/luis/Projects/portfolio_web check-ignore -v node_modules dist .astro .env)",
+      "Bash(git -C /home/luis/Projects/portfolio_web status --porcelain)",
+      "Bash(git -C /home/luis/Projects/portfolio_web add .claude/settings.json docs/ARCHITECTURE.md docs/NEXT_STEPS.md .env.example .gitignore .nvmrc astro.config.mjs package.json pnpm-lock.yaml pnpm-workspace.yaml src/ tsconfig.json)",
+      "Bash(git -C /home/luis/Projects/portfolio_web commit -m ' *)"
     ]
   }
 }
