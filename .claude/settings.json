@@ -46,7 +46,8 @@
       "Bash(curl -sI https://portfolio-web-psi-swart.vercel.app/)",
       "Bash(bash -c 'for path in \"/\" \"/es/\" \"/projects/\" \"/articles/\" \"/now/\" \"/contact/\" \"/projects/fmodel-mcp/\" \"/es/projects/fmodel-mcp/\" \"/projects/unity-mcp-port/\" \"/es/projects/unity-mcp-port/\" \"/sitemap-index.xml\"; do code=$\\(curl -s -o /dev/null -w \"%{http_code}\" \"https://portfolio-web-psi-swart.vercel.app${path}\"\\); printf \"%-40s %s\\\\n\" \"$path\" \"$code\"; done')",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(bash -c ' *)"
     ]
   }
 }

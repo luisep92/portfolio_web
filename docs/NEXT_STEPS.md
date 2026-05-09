@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: live on Vercel, content next.** **Steps 1–10 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, security headers (`vercel.json`) and an e2e test layer (Playwright + Chromium, 11 specs, all green in ~4 s), **and the site deployed at <https://portfolio-web-psi-swart.vercel.app>** with CSP + hygiene headers verified live. Aline writeup deferred until that project ships (moved to deferred / nice-to-haves). Next: **Step 11** — first AI article. Then projects pass, then visual decisions against the real URL.
+**Phase: live on Vercel, content next.** **Steps 1–10 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, security headers (`vercel.json`) and an e2e test layer (Playwright + Chromium, 11 specs, all green in ~4 s), **and the site deployed at <https://www.luisep.dev>** with CSP + hygiene headers verified live. Aline writeup deferred until that project ships (moved to deferred / nice-to-haves). Next: **Step 11** — first AI article. Then projects pass, then visual decisions against the real URL.
 
 ---
 
@@ -131,11 +131,11 @@ CI workflow at `.github/workflows/e2e.yml` runs the suite on every push and PR.
 
 ### 10. Deploy to Vercel — done
 
-Production URL: <https://portfolio-web-psi-swart.vercel.app>. GitHub repo wired, Astro auto-detected, `vercel.json` consumed at the edge. `astro.config.mjs` `site` updated from the `https://example.com` placeholder to the live `*.vercel.app` URL so sitemap absolute links resolve correctly. Custom domain remains a deferred decision.
+Production URL: <https://www.luisep.dev>. GitHub repo wired, Astro auto-detected, `vercel.json` consumed at the edge. Custom domain `luisep.dev` registered at Cloudflare; `www.luisep.dev` is the canonical hostname and the apex 307-redirects to it. `astro.config.mjs` `site` set to the canonical URL so sitemap absolute links resolve correctly. Detail in [DECISIONS.md → "Domain"](DECISIONS.md).
 
 Verification (live):
 
-- `curl -I https://portfolio-web-psi-swart.vercel.app/` returns `200` with `content-security-policy`, `permissions-policy`, `referrer-policy`, `x-content-type-options: nosniff`, and Vercel's own `strict-transport-security`. CSP `frame-src` allowlist limited to youtube-nocookie.com + player.vimeo.com as authored.
+- `curl -I https://www.luisep.dev/` returns `200` with `content-security-policy`, `permissions-policy`, `referrer-policy`, `x-content-type-options: nosniff`, and Vercel's own `strict-transport-security`. CSP `frame-src` allowlist limited to youtube-nocookie.com + player.vimeo.com as authored.
 - All 11 routes covered by the e2e suite (home EN/ES, projects index EN/ES, articles EN/ES, now, contact, project detail EN/ES, partial-bilingual fallback) plus `/sitemap-index.xml` return `200` against the live URL.
 
 ### 11. First real content: AI / Claude Code article (EN) — pending
@@ -182,7 +182,6 @@ Verification (live):
 - Full ES translations of all featured project narratives and the launch articles.
 - Additional articles.
 - RSS feed for `/articles`.
-- Custom domain (separate from Step 10's free `*.vercel.app`).
 - Analytics (decision still open in [DECISIONS.md](DECISIONS.md)).
 - Open Graph image generation per article/project (vs. one shared OG image).
 - [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp) at user level for Claude's visual verification across projects (the project-level Playwright install for e2e tests landed in Step 9; the MCP layer is the separate "Claude can see the rendered page during dev" capability).

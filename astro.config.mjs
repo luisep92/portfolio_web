@@ -7,7 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 // Sitemap and RSS use this as the base URL for absolute links.
 // Update once a custom domain is wired up (see docs/DECISIONS.md → "Open decisions").
 export default defineConfig({
-  site: 'https://portfolio-web-psi-swart.vercel.app',
+  site: 'https://www.luisep.dev',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],

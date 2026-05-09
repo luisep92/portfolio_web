@@ -105,6 +105,14 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 
 ---
 
+### Domain: `luisep.dev`, canonical at `www.luisep.dev`
+
+**Rule:** The site lives at `https://www.luisep.dev`. The apex `https://luisep.dev/` issues a 307 redirect to the `www` subdomain. The domain is registered at Cloudflare (registrar + DNS); DNS records are "DNS only" (proxy off) so Vercel handles CDN + TLS without a second proxy in front.
+
+**Why:** `.dev` is in the browser HSTS preload list, so HTTPS is mandatory at the protocol level — a property worth having for free on a site that has no reason to ever serve over HTTP. The `www`-as-canonical choice is a reversal of the more common apex-canonical convention, but it makes the redirect direction match what most copy-pasters do (people type `www.` more often than they don't), and `www`-canonical avoids edge cases with apex CNAME flattening on registrars that don't support it. Cloudflare proxy stays off because doubling Cloudflare and Vercel in the request path causes TLS handshake conflicts and adds nothing that Vercel's edge doesn't already do.
+
+---
+
 ### No comments, no newsletter, no contact form
 
 **Rule:** The Contact page is plain text: email + LinkedIn + GitHub. There is no contact form, no comments section under articles, no newsletter signup. The site does not collect any user input.
