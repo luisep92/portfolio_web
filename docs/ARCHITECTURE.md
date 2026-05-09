@@ -290,7 +290,8 @@ To add a new MDX component:
 - **Build**: `pnpm build` → static output in `dist/`.
 - **Preview a build**: `pnpm preview` → serve `dist/` locally (sanity check before pushing).
 - **Deploy**: GitHub → Vercel, automatic on push to `main`. Pull requests get preview URLs automatically.
-- **Environment variables**: `.env.example` documents the keys. Real values live in Vercel project settings, never in the repo. There are no required env vars at v1; this slot is reserved for future use (analytics tokens, etc.).
+- **Environment variables**: `.env.example` documents the keys. Real values live in Vercel project settings, never in the repo. There are no required env vars at v1; this slot is reserved for future use.
+- **Analytics**: [`@vercel/analytics`](https://www.npmjs.com/package/@vercel/analytics) (the `/astro` entrypoint) is mounted once in `BaseLayout` with `mode={import.meta.env.PROD ? 'production' : 'development'}` — local dev doesn't pollute the dashboard. Default pageview tracking only; no custom events. Privacy-clean by default (no cookies, no PII). Rationale in [DECISIONS.md → "Analytics"](DECISIONS.md). Speed Insights (real-user web vitals) is intentionally not added here — performance work is scoped to Step 15 of [NEXT_STEPS.md](NEXT_STEPS.md).
 
 ---
 

@@ -129,6 +129,14 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 
 ---
 
+### Analytics: Vercel Analytics, default mode by environment
+
+**Rule:** Use [`@vercel/analytics`](https://www.npmjs.com/package/@vercel/analytics) (the `/astro` entrypoint), mounted once in `BaseLayout` with `mode={import.meta.env.PROD ? 'production' : 'development'}`. No other analytics provider, no custom event tracking beyond the default pageview.
+
+**Why:** The site is already on Vercel — the analytics integration is one dependency, one component, zero infra. The free tier (2.5k events/mo) covers v1 traffic with margin. It's privacy-clean by default: no cookies, no PII, no fingerprinting, no consent banner needed under GDPR. The explicit `mode` prop suppresses events from local dev so the dashboard isn't polluted while working on the site. Plausible / Umami / a self-hosted equivalent would have given roughly the same shape of data for more setup; `none` would have left us blind to whether anyone is actually reading the articles, which is the one signal that matters once content is live.
+
+---
+
 ## Open decisions
 
 These are deliberately held open until there's enough information or visual context to close them well. Each lists what's needed to close it.
@@ -137,4 +145,3 @@ These are deliberately held open until there's enough information or visual cont
 - **Typography.** Heading serif candidates: Tiempos Headline, GT Sectra, Newsreader (free). Body sans is also open but lower-stakes — likely Inter or a system stack. Closing needs a sample page comparing the candidates at real sizes.
 - **One moment of character on home.** Exactly one of: subtle reactive cursor, a one-off animated detail, an elegant entry transition. Closing needs prototyping the candidate and seeing whether it feels intentional or "trying hard."
 - **Font hosting strategy.** Self-host the WOFF2 files in `/public` vs. Google Fonts vs. a foundry CDN. Trade-off: privacy + control vs. caching + bandwidth. Closing happens together with the typography choice.
-- **Analytics.** Three options: none, a privacy-respecting minimum (Plausible / Umami), or a self-hosted equivalent. Default for v1 is **none** unless we close otherwise.
