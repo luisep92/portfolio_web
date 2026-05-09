@@ -227,6 +227,7 @@ Components available inside MDX bodies are exposed via the `components` prop on 
 | `<VideoEmbed />` | `src/components/mdx/VideoEmbed.astro` | Self-hosted (`<video preload="none">` + `poster`) or YouTube/Vimeo (lazy iframe to the privacy-friendly embed origin). `prefers-reduced-motion` respected by default — no autoplay, no loop. |
 | `<Callout />` | `src/components/mdx/Callout.astro` | Inline highlighted block. `kind`: `note` (default, slate-tinted) or `aside` (quieter, left-rule only). A `warn` variant is intentionally deferred until the accent color in DECISIONS.md is closed — adding amber/red would step on the single-accent rule. |
 | `<Figure />` | `src/components/mdx/Figure.astro` | Image with required `alt` and optional `caption`, lazy-loaded. |
+| `<CommitFlowDiagram />` | `src/components/mdx/CommitFlowDiagram.astro` | Inline SVG flow used in the *practical workflow for Claude Code* article (code generated → review → atomic commit → push → code review). Single-accent, slate palette; the diagram is data-viz inside content, not chrome, so the categorical labels under each box carry meaning instead of colour. |
 
 The map is wired into both `src/layouts/ProjectLayout.astro` and `src/layouts/ArticleLayout.astro` via `<Content components={mdxComponents} />`.
 

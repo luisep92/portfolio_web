@@ -1,6 +1,7 @@
 import VideoEmbed from './VideoEmbed.astro';
 import Callout from './Callout.astro';
 import Figure from './Figure.astro';
+import CommitFlowDiagram from './CommitFlowDiagram.astro';
 
 /**
  * Components consumable from inside MDX without explicit imports.
@@ -17,4 +18,5 @@ export const mdxComponents = {
   VideoEmbed,
   Callout,
   Figure,
+  CommitFlowDiagram,
 };
