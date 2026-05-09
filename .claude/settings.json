@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /home/luis/Projects/portfolio_web log --oneline -20)",
+      "Bash(git -C /home/luis/Projects/portfolio_web status)",
+      "Edit(/.claude/skills/docs-governance/**)",
+      "Edit(/.claude/skills/content-authoring/**)"
+    ]
+  }
+}
