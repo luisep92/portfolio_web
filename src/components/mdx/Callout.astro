@@ -2,10 +2,17 @@
 /**
  * Inline highlighted block inside MDX.
  *
- * Two kinds today: `note` (default, slate-tinted) and `aside` (quieter,
- * left-rule only). A `warn` variant is intentionally deferred until the
- * accent color in DECISIONS.md is closed — adding a second strong color
- * (amber/red) would step on the single-accent rule.
+ * Two kinds today:
+ *   - `note` (default) — solid slate card with full border. Carries weight;
+ *     use it when a paragraph genuinely needs to break the flow (rules of
+ *     thumb, takeaways, gotchas).
+ *   - `aside` — quiet left-rule with transparent bg. Use it for tangential
+ *     thoughts that shouldn't compete with the body.
+ *
+ * Coloured variants (`warn`/`success`/`important`) are intentionally
+ * deferred until the accent colour in DECISIONS.md is closed — single
+ * accent rule. Until then, hierarchy comes from weight, padding, and
+ * border, not hue.
  */
 interface Props {
   kind?: 'note' | 'aside';
@@ -14,11 +21,11 @@ interface Props {
 const { kind = 'note' } = Astro.props;
 
 const styles = {
-  note: 'border-slate-700 bg-slate-900/40 text-slate-200',
-  aside: 'border-slate-800 bg-transparent text-slate-300',
+  note: 'my-8 rounded-lg border border-slate-800 bg-slate-900 px-5 py-4 leading-relaxed text-slate-200',
+  aside: 'my-6 rounded border-l-2 border-slate-800 bg-transparent px-4 py-3 leading-relaxed text-slate-300',
 } as const;
 ---
 
-<div class:list={['my-6 rounded border-l-2 px-4 py-3 leading-relaxed', styles[kind]]}>
+<div class={styles[kind]}>
   <slot />
 </div>

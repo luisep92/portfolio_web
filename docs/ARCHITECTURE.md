@@ -225,7 +225,7 @@ Components available inside MDX bodies are exposed via the `components` prop on 
 | Component | File | Purpose |
 |---|---|---|
 | `<VideoEmbed />` | `src/components/mdx/VideoEmbed.astro` | Self-hosted (`<video preload="none">` + `poster`) or YouTube/Vimeo (lazy iframe to the privacy-friendly embed origin). `prefers-reduced-motion` respected by default — no autoplay, no loop. |
-| `<Callout />` | `src/components/mdx/Callout.astro` | Inline highlighted block. `kind`: `note` (default, slate-tinted) or `aside` (quieter, left-rule only). A `warn` variant is intentionally deferred until the accent color in DECISIONS.md is closed — adding amber/red would step on the single-accent rule. |
+| `<Callout />` | `src/components/mdx/Callout.astro` | Inline highlighted block. `kind`: `note` (default, **solid slate-900 card with full border** — carries weight, use when a paragraph genuinely needs to break flow) or `aside` (quieter left-rule, transparent bg — for tangential thoughts). Coloured variants (`warn`/`success`/`important`) are intentionally deferred until the accent colour in DECISIONS.md is closed — single-accent rule. |
 | `<Figure />` | `src/components/mdx/Figure.astro` | Image with required `alt` and optional `caption`, lazy-loaded. |
 | `<CommitFlowDiagram />` | `src/components/mdx/CommitFlowDiagram.astro` | Inline SVG flow used in the *practical workflow for Claude Code* article (code generated → review → atomic commit → push → code review). Single-accent, slate palette; the diagram is data-viz inside content, not chrome, so the categorical labels under each box carry meaning instead of colour. |
 

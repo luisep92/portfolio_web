@@ -131,7 +131,7 @@ A small contextual aside that doesn't belong in the main flow.
 Conventions:
 
 - `<VideoEmbed />` accepts either a self-hosted `src` (under `/public/media/...`) or a YouTube/Vimeo URL. For self-hosted videos always set `poster` so the page doesn't pop on load — the underlying `<video>` uses `preload="none"` so the file only fetches when the reader plays it. Reduced-motion users see the poster until they explicitly play; no autoplay or loop.
-- `<Callout kind>` accepts `note` (default) or `aside`. A `warn` variant is intentionally deferred until the accent color in DECISIONS.md is closed — until then, emphasis goes through `note` + bold/italic inline.
+- `<Callout kind>` accepts `note` (default — solid slate card with full border, use it when a paragraph genuinely needs to break flow) or `aside` (quieter left-rule, transparent bg, for tangential thoughts that shouldn't compete with the body). Coloured variants (`warn`/`success`/`important`) are intentionally deferred until the accent colour in DECISIONS.md is closed; until then, hierarchy comes from weight, padding, and border, not hue.
 - `<Figure>` requires `src` and `alt`; `caption` is optional. `alt` describes what's in the image (a11y); `caption` is shown to readers below.
 - `<CommitFlowDiagram />` is article-scoped (used in *practical workflow for Claude Code*). No props. Single-accent SVG; categorical labels live in text under each box, not in colour. If you need a different inline diagram, build a sibling component rather than parameterising this one — generic chart components tend to over-fit the first article and under-fit the second.
 
