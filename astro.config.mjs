@@ -4,10 +4,10 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
-// Replace `site` once the domain is picked (see docs/DECISIONS.md → "Open decisions").
-// Sitemap and RSS will use this as the base URL for absolute links.
+// Sitemap and RSS use this as the base URL for absolute links.
+// Update once a custom domain is wired up (see docs/DECISIONS.md → "Open decisions").
 export default defineConfig({
-  site: 'https://example.com',
+  site: 'https://portfolio-web-psi-swart.vercel.app',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],

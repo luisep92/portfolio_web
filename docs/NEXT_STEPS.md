@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: scaffolding done, content + deploy next.** **Steps 1–9 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, **plus security headers (`vercel.json`) and an e2e test layer (Playwright + Chromium, 11 specs covering nav / locale toggle / projects / partial-bilingual / contact / Callout, all green in ~4 s)**. Aline writeup deferred until that project ships (moved to deferred / nice-to-haves). Next: **Step 10** — push to GitHub and deploy to Vercel; this unlocks a real URL to evaluate the still-open visual decisions against. After deploy: first article, then projects pass.
+**Phase: live on Vercel, content next.** **Steps 1–10 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, security headers (`vercel.json`) and an e2e test layer (Playwright + Chromium, 11 specs, all green in ~4 s), **and the site deployed at <https://portfolio-web-psi-swart.vercel.app>** with CSP + hygiene headers verified live. Aline writeup deferred until that project ships (moved to deferred / nice-to-haves). Next: **Step 11** — first AI article. Then projects pass, then visual decisions against the real URL.
 
 ---
 
@@ -129,16 +129,14 @@ E2E test layer: Playwright + Chromium. Specs under `tests/e2e/` cover home (EN +
 
 CI workflow at `.github/workflows/e2e.yml` runs the suite on every push and PR.
 
-### 10. Deploy to Vercel — pending
+### 10. Deploy to Vercel — done
 
-**Goal:** `main` is wired to Vercel; PRs produce preview URLs; the production URL is canonical.
+Production URL: <https://portfolio-web-psi-swart.vercel.app>. GitHub repo wired, Astro auto-detected, `vercel.json` consumed at the edge. `astro.config.mjs` `site` updated from the `https://example.com` placeholder to the live `*.vercel.app` URL so sitemap absolute links resolve correctly. Custom domain remains a deferred decision.
 
-- `git push origin main` — the GitHub remote `git@github.com:luisep92/portfolio_web.git` already exists; the local commits just haven't been pushed yet.
-- Connect the GitHub repo to a new Vercel project. Astro is auto-detected; no extra build config beyond the existing `vercel.json`.
-- Update `astro.config.mjs` `site` from the `https://example.com` placeholder to the real URL once it's known (default `*.vercel.app` is fine for v1; custom domain is a deferred decision).
-- After first deploy: `curl -I https://<url>` and confirm `Content-Security-Policy`, `X-Content-Type-Options`, etc. land in the response.
-- Smoke-test the same surface the e2e tests cover, against the production URL.
-- **Validation:** a trivial PR produces a preview URL; merging it updates production; the security headers from `vercel.json` are visible in the live response.
+Verification (live):
+
+- `curl -I https://portfolio-web-psi-swart.vercel.app/` returns `200` with `content-security-policy`, `permissions-policy`, `referrer-policy`, `x-content-type-options: nosniff`, and Vercel's own `strict-transport-security`. CSP `frame-src` allowlist limited to youtube-nocookie.com + player.vimeo.com as authored.
+- All 11 routes covered by the e2e suite (home EN/ES, projects index EN/ES, articles EN/ES, now, contact, project detail EN/ES, partial-bilingual fallback) plus `/sitemap-index.xml` return `200` against the live URL.
 
 ### 11. First real content: AI / Claude Code article (EN) — pending
 

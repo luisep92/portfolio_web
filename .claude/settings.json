@@ -41,7 +41,12 @@
       "Bash(git -C /home/luis/Projects/portfolio_web remote -v)",
       "Bash(git -C /home/luis/Projects/portfolio_web add vercel.json docs/ARCHITECTURE.md .claude/settings.json)",
       "Bash(ls /home/luis/.cache/ms-playwright/ 2>&1 | head -10)",
-      "Read(//home/luis/.cache/ms-playwright/**)"
+      "Read(//home/luis/.cache/ms-playwright/**)",
+      "Bash(git -C /home/luis/Projects/portfolio_web add .github/)",
+      "Bash(curl -sI https://portfolio-web-psi-swart.vercel.app/)",
+      "Bash(bash -c 'for path in \"/\" \"/es/\" \"/projects/\" \"/articles/\" \"/now/\" \"/contact/\" \"/projects/fmodel-mcp/\" \"/es/projects/fmodel-mcp/\" \"/projects/unity-mcp-port/\" \"/es/projects/unity-mcp-port/\" \"/sitemap-index.xml\"; do code=$\\(curl -s -o /dev/null -w \"%{http_code}\" \"https://portfolio-web-psi-swart.vercel.app${path}\"\\); printf \"%-40s %s\\\\n\" \"$path\" \"$code\"; done')",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
