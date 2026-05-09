@@ -19,8 +19,8 @@ const copyLabel = t(locale, 'share.copy.label');
 const copiedLabel = t(locale, 'share.copy.success');
 ---
 
-<aside class="mt-16 border-t border-slate-800 pt-8" aria-labelledby="share-heading">
-  <p id="share-heading" class="m-0 text-xs font-medium uppercase tracking-wide text-slate-500">
+<aside class="mt-16 border-t border-slate-800 pt-8" aria-label={heading}>
+  <p class="m-0 text-xs font-medium uppercase tracking-wide text-slate-500">
     {heading}
   </p>
   <ul class="m-0 mt-3 flex list-none flex-wrap gap-x-5 gap-y-2 p-0 text-sm">
@@ -31,7 +31,7 @@ const copiedLabel = t(locale, 'share.copy.success');
         rel="noopener noreferrer"
         class="text-slate-300 underline decoration-slate-700 underline-offset-4 transition-colors hover:text-slate-100 hover:decoration-current"
       >
-        Twitter
+        Twitter →
       </a>
     </li>
     <li>
@@ -41,7 +41,7 @@ const copiedLabel = t(locale, 'share.copy.success');
         rel="noopener noreferrer"
         class="text-slate-300 underline decoration-slate-700 underline-offset-4 transition-colors hover:text-slate-100 hover:decoration-current"
       >
-        LinkedIn
+        LinkedIn →
       </a>
     </li>
     <li>
@@ -51,7 +51,7 @@ const copiedLabel = t(locale, 'share.copy.success');
         rel="noopener noreferrer"
         class="text-slate-300 underline decoration-slate-700 underline-offset-4 transition-colors hover:text-slate-100 hover:decoration-current"
       >
-        Hacker News
+        Hacker News →
       </a>
     </li>
     <li>

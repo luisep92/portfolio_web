@@ -40,6 +40,8 @@ const articleUrl = new URL(Astro.url.pathname, Astro.site!).toString();
     <h1 class="mt-3 text-4xl font-semibold tracking-tight">{entry.data.title}</h1>
     <p class="mt-6 text-lg leading-relaxed text-slate-300">{entry.data.description}</p>
 
+    <ArticleShareLinks url={articleUrl} title={entry.data.title} />
+
     <article class="mdx-body mt-16">
       <Content components={mdxComponents} />
     </article>
