@@ -29,32 +29,32 @@ function detailHref(entry: ProjectEntry): string {
     <h1 class="text-4xl font-semibold tracking-tight">{heading}</h1>
 
     <section class="mt-16">
-      <h2 class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <h2 class="text-xs font-medium uppercase tracking-wide text-slate-500">
         {t(locale, 'projects.featured_heading')}
       </h2>
 
       {featured.length > 0 ? (
-        <ul class="mt-6 border-t border-neutral-900">
+        <ul class="mt-6 border-t border-slate-900">
           {featured.map((entry) => (
             <li>
               <a
                 href={detailHref(entry)}
-                class="group block border-b border-neutral-900 py-6 transition-colors hover:bg-neutral-900/40"
+                class="group -mx-4 block rounded border-b border-slate-900 px-4 py-6 transition-colors hover:bg-slate-900/50"
               >
                 <div class="flex items-baseline justify-between gap-4">
-                  <h3 class="text-xl font-medium text-neutral-100">
+                  <h3 class="text-xl font-medium text-slate-100">
                     {entry.data.title}
                     <span class="ml-1 inline-block opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100">
                       →
                     </span>
                   </h3>
                   {entry.data.year && (
-                    <span class="shrink-0 text-sm text-neutral-500">{entry.data.year}</span>
+                    <span class="shrink-0 text-sm text-slate-500">{entry.data.year}</span>
                   )}
                 </div>
-                <p class="mt-2 leading-relaxed text-neutral-400">{entry.data.summary}</p>
+                <p class="mt-2 leading-relaxed text-slate-400">{entry.data.summary}</p>
                 {entry.data.role && (
-                  <p class="mt-3 text-xs uppercase tracking-wide text-neutral-500">
+                  <p class="mt-3 text-xs uppercase tracking-wide text-slate-500">
                     {entry.data.role}
                   </p>
                 )}
@@ -63,13 +63,13 @@ function detailHref(entry: ProjectEntry): string {
           ))}
         </ul>
       ) : (
-        <p class="mt-6 text-neutral-400">{t(locale, 'projects.empty')}</p>
+        <p class="mt-6 text-slate-400">{t(locale, 'projects.empty')}</p>
       )}
     </section>
 
     {other.length > 0 && (
       <section class="mt-20">
-        <h2 class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+        <h2 class="text-xs font-medium uppercase tracking-wide text-slate-500">
           {t(locale, 'projects.other_heading')}
         </h2>
         <ul class="mt-6 space-y-3 text-sm">
@@ -80,16 +80,16 @@ function detailHref(entry: ProjectEntry): string {
             const externalHref = repo ?? article ?? demo;
             const meta = [entry.data.year, entry.data.role].filter(Boolean).join(' · ');
             return (
-              <li class="leading-relaxed text-neutral-400">
-                <span class="text-neutral-200">{entry.data.title}</span>
-                {meta && <span class="text-neutral-500"> — {meta}</span>}
+              <li class="leading-relaxed text-slate-400">
+                <span class="text-slate-200">{entry.data.title}</span>
+                {meta && <span class="text-slate-500"> — {meta}</span>}
                 <span> — {entry.data.summary}</span>
                 {externalHref && (
                   <>
                     {' '}
                     <a
                       href={externalHref}
-                      class="text-neutral-300 underline-offset-4 hover:text-neutral-100 hover:underline"
+                      class="text-slate-300 underline-offset-4 hover:text-slate-100 hover:underline"
                       rel="noopener"
                       target="_blank"
                     >

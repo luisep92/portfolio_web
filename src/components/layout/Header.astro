@@ -27,11 +27,11 @@ function isActive(basePath: string): boolean {
 }
 ---
 
-<header class="border-b border-neutral-900">
+<header class="border-b border-slate-900">
   <Container class="flex items-center justify-between gap-8 py-6">
     <a
       href={localizedPath('/', locale)}
-      class="text-sm font-medium text-neutral-200 hover:text-neutral-100 transition-colors"
+      class="text-sm font-medium text-slate-200 hover:text-slate-100 transition-colors"
     >
       {t(locale, 'site.title')}
     </a>
@@ -42,8 +42,8 @@ function isActive(basePath: string): boolean {
           class:list={[
             'text-sm transition-colors',
             isActive(item.basePath)
-              ? 'text-neutral-100'
-              : 'text-neutral-400 hover:text-neutral-100',
+              ? 'text-slate-100'
+              : 'text-slate-400 hover:text-slate-100',
           ]}
         >
           {t(locale, item.key)}

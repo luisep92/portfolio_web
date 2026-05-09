@@ -32,7 +32,9 @@
       "Bash(git -C /home/luis/Projects/portfolio_web add .claude/settings.json src/pages/index.astro src/pages/es/index.astro)",
       "Bash(git -C /home/luis/Projects/portfolio_web add docs/ARCHITECTURE.md docs/NEXT_STEPS.md src/components/MissingTranslationNotice.astro src/content/projects/ src/layouts/ArticleLayout.astro src/layouts/ProjectLayout.astro src/lib/ src/pages/articles/\\\\[slug\\\\].astro src/pages/es/articles/\\\\[slug\\\\].astro src/pages/es/projects/\\\\[slug\\\\].astro src/pages/projects/\\\\[slug\\\\].astro)",
       "Bash(git -C /home/luis/Projects/portfolio_web log --oneline -8)",
-      "Bash(git -C /home/luis/Projects/portfolio_web add src/components/layout/Header.astro .claude/settings.json)"
+      "Bash(git -C /home/luis/Projects/portfolio_web add src/components/layout/Header.astro .claude/settings.json)",
+      "Bash(git -C /home/luis/Projects/portfolio_web add docs/NEXT_STEPS.md src/i18n/ui.ts src/pages/es/projects/index.astro src/pages/projects/index.astro)",
+      "Bash(git -C /home/luis/Projects/portfolio_web add -A)"
     ]
   }
 }

@@ -24,13 +24,13 @@ const updated = entry.data.updatedAt ? formatter.format(entry.data.updatedAt) : 
 
 <BaseLayout title={`${entry.data.title} — Luis Escolano`} description={entry.data.description}>
   <Container class="py-24">
-    <p class="text-xs uppercase tracking-wide text-neutral-500">
-      {published}{updated && <span class="text-neutral-600"> · updated {updated}</span>}
+    <p class="text-xs uppercase tracking-wide text-slate-500">
+      {published}{updated && <span class="text-slate-600"> · updated {updated}</span>}
     </p>
     <h1 class="mt-3 text-4xl font-semibold tracking-tight">{entry.data.title}</h1>
-    <p class="mt-6 text-lg leading-relaxed text-neutral-300">{entry.data.description}</p>
+    <p class="mt-6 text-lg leading-relaxed text-slate-300">{entry.data.description}</p>
 
-    <article class="mt-12 leading-relaxed text-neutral-200 [&>p]:mt-6 [&>h2]:mt-12 [&>h2]:text-2xl [&>h2]:font-semibold">
+    <article class="mt-12 leading-relaxed text-slate-200 [&>p]:mt-6 [&>h2]:mt-12 [&>h2]:text-2xl [&>h2]:font-semibold">
       <Content />
     </article>
   </Container>
