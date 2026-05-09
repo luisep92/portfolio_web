@@ -16,6 +16,8 @@ export const defaultLocale: Locale = 'en';
 export const ui = {
   en: {
     'site.title': 'Luis Escolano',
+    'site.description':
+      'Software engineer. Game mods, AI tooling, product across stacks. Portfolio and writing.',
     'nav.home': 'Home',
     'nav.projects': 'Projects',
     'nav.articles': 'Articles',
@@ -37,6 +39,8 @@ export const ui = {
   },
   es: {
     'site.title': 'Luis Escolano',
+    'site.description':
+      'Software engineer. Mods de juegos, herramientas para IA, producto en distintos stacks. Portfolio y artículos.',
     'nav.home': 'Inicio',
     'nav.projects': 'Proyectos',
     'nav.articles': 'Artículos',

@@ -2,16 +2,33 @@
 import '../styles/global.css';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
-import { getLocaleFromUrl, t } from '../i18n/utils';
+import { defaultLocale } from '../i18n/ui';
+import { getLocaleFromUrl, localizedPath, otherLocale, t } from '../i18n/utils';
 
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  publishedAt?: Date;
 }
 
 const locale = getLocaleFromUrl(Astro.url);
-const { title, description } = Astro.props;
+const { title, description, ogImage, ogType = 'website', publishedAt } = Astro.props;
+
 const finalTitle = title ?? t(locale, 'site.title');
+const finalDescription = description ?? t(locale, 'site.description');
+
+const siteUrl = Astro.site!;
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const ogImageUrl = new URL(ogImage ?? '/og-default.png', siteUrl).toString();
+
+const ogLocale = locale === 'es' ? 'es_ES' : 'en_US';
+const otherLoc = otherLocale(locale);
+const otherLocPath = localizedPath(Astro.url.pathname, otherLoc);
+const otherLocUrl = new URL(otherLocPath, siteUrl).toString();
+const otherOgLocale = otherLoc === 'es' ? 'es_ES' : 'en_US';
+const xDefaultUrl = new URL(localizedPath(Astro.url.pathname, defaultLocale), siteUrl).toString();
 ---
 
 <!doctype html>
@@ -19,8 +36,34 @@ const finalTitle = title ?? t(locale, 'site.title');
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
     <title>{finalTitle}</title>
-    {description && <meta name="description" content={description} />}
+    <meta name="description" content={finalDescription} />
+
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang={locale} href={canonicalUrl} />
+    <link rel="alternate" hreflang={otherLoc} href={otherLocUrl} />
+    <link rel="alternate" hreflang="x-default" href={xDefaultUrl} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:title" content={finalTitle} />
+    <meta property="og:description" content={finalDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Luis Escolano" />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={otherOgLocale} />
+    {publishedAt && <meta property="article:published_time" content={publishedAt.toISOString()} />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={finalTitle} />
+    <meta name="twitter:description" content={finalDescription} />
+    <meta name="twitter:image" content={ogImageUrl} />
   </head>
   <body class="flex min-h-screen flex-col bg-slate-950 text-slate-100 antialiased">
     <Header />

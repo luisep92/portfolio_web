@@ -23,7 +23,13 @@ const published = formatter.format(entry.data.publishedAt);
 const updated = entry.data.updatedAt ? formatter.format(entry.data.updatedAt) : null;
 ---
 
-<BaseLayout title={`${entry.data.title} — Luis Escolano`} description={entry.data.description}>
+<BaseLayout
+  title={`${entry.data.title} — Luis Escolano`}
+  description={entry.data.description}
+  ogImage={entry.data.coverImage}
+  ogType="article"
+  publishedAt={entry.data.publishedAt}
+>
   <Container class="py-24">
     <p class="text-xs uppercase tracking-wide text-slate-500">
       {published}{updated && <span class="text-slate-600"> · updated {updated}</span>}

@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: first article live + structurally polished, discoverability next.** **Steps 1–11 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, security headers (`vercel.json`), e2e test layer (Playwright + Chromium, all green), site deployed at <https://www.luisep.dev>, **and the first AI article live at `/articles/practical-workflow-claude-code`** — initially shipped as a faithful migration, then structurally reworked after the live preview reading: typography prose class, solid Callout cards, IterationCycle timeline replacing the eleven-paragraph block, Takeaway pull-quotes (TL;DR + 2 mid-piece), AppliedHere reference cards linking abstract claims to artefacts in this very repo, h3 promotion in sections 6 + 8, real Step-11 commits replacing the fake example, a new "Things I don't use (and why)" section taking position on multi-agent setups / roleplay / cross-repo automation. The article-rework PR (`dev` branch, 8 commits at last count) is **pending merge by the user**. Aline writeup deferred until that project ships. Next: **Step 12** — discoverability (share buttons + OG metadata audit + Vercel Analytics), then **Step 13** other projects, then visual decisions, then a11y + Lighthouse.
+**Phase: first article live + structurally polished, discoverability next.** **Steps 1–11 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, security headers (`vercel.json`), e2e test layer (Playwright + Chromium, all green), site deployed at <https://www.luisep.dev>, **and the first AI article live at `/articles/practical-workflow-claude-code`** — initially shipped as a faithful migration, then structurally reworked after the live preview reading: typography prose class, solid Callout cards, IterationCycle timeline replacing the eleven-paragraph block, Takeaway pull-quotes (TL;DR + 2 mid-piece), AppliedHere reference cards linking abstract claims to artefacts in this very repo, h3 promotion in sections 6 + 8, real Step-11 commits replacing the fake example, a new "Things I don't use (and why)" section taking position on multi-agent setups / roleplay / cross-repo automation. The article-rework PR (`dev` branch, 8 commits at last count) is **pending merge by the user**. Aline writeup deferred until that project ships. Currently mid-**Step 12** (discoverability): OG metadata audit landed (canonical, hreflang EN/ES, full OG/Twitter card chain, `og-default.png` + `favicon.svg`); share buttons + Vercel Analytics pending. Then **Step 13** other projects, then visual decisions, then a11y + Lighthouse.
 
 ---
 
@@ -150,13 +150,13 @@ E2E spec at `tests/e2e/articles.spec.ts` exercises: index → detail navigation,
 
 Both `articles/en/hello-world.mdx` and `articles/es/hello-world.mdx` placeholders deleted now that real content exists. The original draft (`a-practical-workflow-for-claude-code.html`) deleted from the repo root — it was scratch, never meant to ship.
 
-### 12. Discoverability — share buttons + OG metadata + Vercel Analytics — pending
+### 12. Discoverability — share buttons + OG metadata + Vercel Analytics — in progress
 
 **Goal:** The article exists; now make it shareable to the right places and measurable. Three sub-tasks, each shippable as its own PR — keep them separate so a regression is easy to bisect:
 
-1. **OG metadata audit on `BaseLayout.astro`.** Verify `og:title`, `og:description`, `og:image`, `og:url`, `twitter:card`, `twitter:site`, `twitter:creator`. Articles need per-entry `og:title` / `og:description`; OG image strategy stays "one shared site image" for v1 (per-entry image generation is deferred — see open decisions). Audit *before* shipping share buttons so the previews aren't broken when traffic clicks through.
-2. **`<ShareLinks>` MDX component.** Twitter/X intent + LinkedIn intent + Hacker News submit + copy-link button (1 line of JS, no library). Rendered in `ArticleLayout` footer below the body. No tracking, no third-party widgets — plain `<a href>` to share intents. Optional follow-up: Mastodon + Bluesky if Luis decides they're worth it.
-3. **Vercel Analytics + close `DECISIONS.md` → "Analytics".** Drop in `@vercel/analytics` package, mount in `BaseLayout`. Free tier (2.5k events/mo) is plenty for v1. Privacy-clean by default (no cookies, no PII). Same-commit doc: move "Analytics" entry from open to closed in `DECISIONS.md` with the rationale ("Vercel-native, zero-infra, privacy-clean; revisit if traffic outgrows the free tier").
+1. **OG metadata audit on `BaseLayout.astro` — done.** All `<head>` metadata centralized in `BaseLayout`: per-entry `og:title`/`og:description` from layout props, `og:image` falls back to `/og-default.png` (a 1200×630 handcrafted card under `public/`), absolute URLs resolved via `Astro.site`. Beyond the original audit checklist also added: `<link rel="canonical">`, `<link rel="alternate" hreflang>` for EN/ES/x-default, `<link rel="icon">` (`favicon.svg`, monogram "LE"), `og:locale`/`og:locale:alternate`, `article:published_time` for articles, `twitter:card="summary_large_image"`. **`twitter:site`/`twitter:creator` intentionally skipped** — keeping the `@Deir___` Twitter separate from the portfolio identity (added as an open entry below). See [ARCHITECTURE.md → "SEO and social meta"](ARCHITECTURE.md). Per-entry image generation (one OG card per article via `@vercel/og`) is **deferred** — kept as an open decision below.
+2. **`<ShareLinks>` MDX component — pending.** Twitter/X intent + LinkedIn intent + Hacker News submit + copy-link button (1 line of JS, no library). Rendered in `ArticleLayout` footer below the body. No tracking, no third-party widgets — plain `<a href>` to share intents. Optional follow-up: Mastodon + Bluesky if Luis decides they're worth it.
+3. **Vercel Analytics + close `DECISIONS.md` → "Analytics" — pending.** Drop in `@vercel/analytics` package, mount in `BaseLayout`. Free tier (2.5k events/mo) is plenty for v1. Privacy-clean by default (no cookies, no PII). Same-commit doc: move "Analytics" entry from open to closed in `DECISIONS.md` with the rationale ("Vercel-native, zero-infra, privacy-clean; revisit if traffic outgrows the free tier").
 
 - **Validation:** preview deployment shows the right OG card when the URL is pasted into Twitter/LinkedIn (use [https://cards-dev.twitter.com/validator](https://cards-dev.twitter.com/validator) or paste-and-preview in a draft); share buttons resolve to working share intents; Vercel Analytics dashboard records pageviews after merge.
 
@@ -202,7 +202,6 @@ The ambient bg texture is a new open sub-decision added during Step 11's polish 
 - Full ES translations of all featured project narratives and the launch articles.
 - Additional articles.
 - RSS feed for `/articles`.
-- Per-article / per-project Open Graph image generation (vs. the one shared OG image set up in Step 12). Deferred unless an article gets organic traction worth optimising the share preview for.
 - [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp) at user level for Claude's visual verification across projects (the project-level Playwright install for e2e tests landed in Step 9; the MCP layer is the separate "Claude can see the rendered page during dev" capability).
 
 ---
@@ -216,6 +215,8 @@ These are tracked in [DECISIONS.md → Open](DECISIONS.md). Listed here so the d
 - Moment of character on home — blocks Step 14.
 - Font hosting — depends on the typography pick; blocks Step 14.
 - **Ambient background texture pattern** — new open sub-decision out of the Step 11 polish loop. Requires reopening "Visual restrictions" in DECISIONS.md to distinguish gradient heroes (still banned) from subtle site-wide ambient texture (allowed at low opacity, fixed). Blocks Step 14.
+- **Twitter author attribution (`twitter:site`/`twitter:creator`)** — new open sub-decision out of Step 12.1. Currently skipped: the `@Deir___` personal Twitter is meme-flavoured and the portfolio audience (recruiters, peers) probably shouldn't land there by default. Revisit if Luis spins up a separate professional handle, or decides the personal one is fine.
+- **Per-entry OG image generation** — currently every page falls back to a single handcrafted `og-default.png`. Per-article custom OG cards (via `@vercel/og` or screenshot pipeline) are deferred until an article gets organic traction worth optimising the share preview for.
 - Analytics — was open; closes as part of Step 12 (Vercel Analytics).
 
 ---
