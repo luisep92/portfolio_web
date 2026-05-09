@@ -33,6 +33,7 @@ export const ui = {
     'projects.featured_heading': 'Featured',
     'projects.other_heading': 'Other technical work',
     'projects.empty': 'More featured projects on the way.',
+    'articles.empty': 'More articles on the way.',
   },
   es: {
     'site.title': 'Luis Escolano',
@@ -53,6 +54,7 @@ export const ui = {
     'projects.featured_heading': 'Destacados',
     'projects.other_heading': 'Otros trabajos técnicos',
     'projects.empty': 'Más proyectos destacados en camino.',
+    'articles.empty': 'Más artículos en camino.',
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

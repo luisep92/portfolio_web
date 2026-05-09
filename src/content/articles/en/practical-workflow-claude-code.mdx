@@ -1,0 +1,212 @@
+---
+title: A practical workflow for Claude Code
+description: How to use Claude Code productively and safely. What it does, what you do, and how a session should look.
+publishedAt: 2026-05-09
+tags:
+  - claude-code
+  - ai-augmented-development
+  - workflow
+---
+
+Notes for engineers using Claude Code seriously on real projects — whether you ship solo, on a team, or somewhere in between. Solo devs: read "your teammate" or "the external reviewer" as "your future self pulling this repo in six months." Same discipline, same gates.
+
+<Callout kind="aside">
+These are notes, not a manifesto. This is how I work with Claude Code today, based on real projects — some I'm preparing to launch, some that stay as public repos documenting how I learned something. It works well for me. Very well. But none of this is exact science, and you shouldn't follow it step by step — I don't even follow it identically across my own projects. Each repo gets the version of this that fits it. Read it as a starting point. Take what helps, leave what doesn't, build your own version.
+</Callout>
+
+## The golden rule
+
+Claude Code is a very fast pair programmer — you are the driver. Every line that reaches code review must be understood and approved by a human. The speed is the superpower and the risk: if you don't review as you go, you'll end up with code you can't explain. Review early, review often.
+
+## 1. Project context — feed Claude, don't repeat yourself
+
+Claude Code has no memory between sessions. If you don't give it context, it guesses — and guesses wrong. The fix is a small set of markdown files in the repo that describe the project, the current state, and how things are done. You write them once, update them as part of your workflow, and Claude reads them at the start of every session.
+
+| File | What it contains | Update frequency |
+|---|---|---|
+| `CLAUDE.md` | Stack, conventions, module structure, coding rules, naming patterns. The "how we do things here" document. Claude Code reads this automatically. | When conventions change |
+| `NEXT_STEPS.md` | Current state, what was done last session, what to do next, known issues. The "where we are" document. | Every session (end) |
+| `ARCHITECTURE.md` | High-level architecture, diagrams, module boundaries, data flow. | When architecture changes |
+| `DECISIONS.md` | Resolved and open architectural decisions with context, so you don't re-debate them. | When decisions are made |
+| `.env.example` | All environment variables with safe defaults. Claude can set up a working dev environment without asking. | When env vars change |
+
+Without context files, every session starts with ten minutes of "here's the project, here's how we do things, here's where we left off." With them, Claude reads the files and is productive in seconds. The investment is five minutes of writing at the end of each session.
+
+<Callout kind="note">
+**Keep it lean.** A 50-page `CLAUDE.md` that nobody updates is worse than no context at all — Claude may follow outdated instructions. Keep files focused, factual, and current. If a section hasn't been updated in months, delete it or mark it as potentially stale.
+</Callout>
+
+### Skills — repo-specific operational knowledge
+
+I've been adding a layer beyond context files: **skills**. A skill is a markdown file that documents a specific operational flow in a specific repo — written *after* I've completed that flow at least once, not before.
+
+Examples from real projects:
+
+- **"How we make commits in this repo"** — message format, granularity, what gets squashed.
+- **"Where each piece of code lives"** — module boundaries that aren't obvious from the directory tree.
+- **"How to add a new X"** — a recipe for the most common type of change in that repo.
+- **"Gotchas when working with Y"** — the dead ends and rakes I've already stepped on.
+
+Skills live in a `.claude/skills/` directory and Claude reads the relevant ones when working on a task that matches their description. They capture *learned knowledge specific to this codebase* in a form that doesn't bloat `CLAUDE.md` and doesn't get lost in chat history.
+
+<Callout kind="note">
+**The key discipline:** write the skill *after* you've done the thing, not before. A skill written speculatively is just docs; a skill written after the first painful pass is operational gold.
+</Callout>
+
+## 2. The iteration cycle — one session, step by step
+
+Every session with Claude Code should follow this cycle. Some steps are done by Claude, some by you, some together. The key discipline: **don't skip the review steps**. Claude Code is fast — dangerously fast. If you let it run without checkpoints, you'll end up with hundreds of lines of code you don't understand.
+
+1. **Align state** *(you)* — open the session by making sure context files are current. If `NEXT_STEPS.md` is stale, update it. If the last session introduced new conventions, update `CLAUDE.md`. Claude will read these files; if they're wrong, it starts wrong.
+2. **Define the task** *(together)* — tell Claude what you want to achieve this session. Be specific: *"add the cancel-order endpoint with validation and error handling"*, not *"work on orders"*. If the task is large, ask Claude to break it down first.
+3. **Plan** *(claude)* — Claude proposes an approach: which files to touch, what the implementation looks like, what order to follow. For small tasks (one file, one function), this is implicit. For anything touching multiple modules, ask for an explicit plan.
+4. **Review the plan** *(you)* — **this is where most mistakes are prevented.** Read what Claude proposes. Does it match the architecture? Does it follow conventions? Is it overcomplicating something? Correct now — not after 300 lines of code.
+5. **Code** *(claude)* — Claude writes the implementation. For large tasks, ask it to work in stages — don't let it generate everything in one shot. Stage boundaries are natural review points.
+6. **Review the code** *(you)* — read the generated code. Understand it. If you can't explain what a function does, you can't commit it. This is not optional — it's the core of the security model. Claude generates fast; you validate thoroughly.
+7. **Test** *(you)* — compile and verify the code works. Run existing tests to check nothing is broken. If your project touches services that are sensitive, costly, or that you don't want exposed to an AI agent's environment — payment APIs, paid LLM keys, internal modules you can't share publicly — mock them. Use a `.env` to keep real credentials out of the working directory entirely. Claude doesn't need real Stripe access to verify your code calls it correctly; it needs a stub that responds with the right shape. The principle: **isolate the dangerous edges, not the whole environment**. A full sandboxed VM is overkill for most projects; a discipline of mocked services and untracked secrets is enough.
+8. **Visual verification** *(you)* — if the change affects output or behavior, verify visually. Don't trust that "it compiles" means "it works". Run the actual scenario end-to-end.
+9. **Document** *(together)* — ask Claude to update `NEXT_STEPS.md` with what was done, decisions made, and what to do next. Review the update — Claude tends to be verbose; trim to what matters.
+10. **Commit & organize** *(you)* — commits must be small, atomic, one concern each. Claude Code advances very fast — if you don't commit frequently, you'll end up with a massive diff that's impossible to review. Organize the commits to tell a story: migration first, then model, then logic, then tests. Each commit should be a reviewable unit with a clear message.
+11. **Push & self-review** *(you)* — push to your code review tool — GitHub, GitLab, Gerrit, whatever you use. Then open the changeset (or pull request, or merge request) in the web UI and review your own code as if you were the external reviewer. Even solo, treat your future self pulling this PR in six months as the external reviewer. Different context catches different things. Approve only when you're confident.
+
+<Callout kind="note">
+**Why atomic commits matter so much here.** Claude Code can generate hundreds of lines in a minute. If commits pile up, you get one giant changeset that nobody — including you — can review properly. Frequent small commits force you to understand each piece as it's produced. It also makes the external reviewer's job dramatically easier: five focused commits versus one monolith.
+</Callout>
+
+## 3. Give Claude tools to verify, not guess
+
+One of the biggest leverage points in working with Claude Code isn't writing better prompts — it's giving Claude the ability to **check its own work** instead of guessing.
+
+The default failure mode of any AI agent is to confidently produce something that looks right and doesn't work. The fix isn't "tell it to be careful". The fix is to put real verification tools in its hands so it can see what's actually happening.
+
+The tools depend on what you're building. A few examples from my own projects:
+
+- **Frontend / web work** → Playwright. Claude can drive a real browser, click through flows, take screenshots, read the DOM. *"Does the form submit correctly?"* stops being a question I answer manually and starts being something Claude verifies before telling me it's done.
+- **Unity / 3D / shaders** → [Unity MCP](/projects/unity-mcp-port) — specifically [a fork I ported to Unity 2019.4](/projects/unity-mcp-port) because the official build didn't support older versions. Claude can read the editor console, manipulate scenes, take screenshots from the editor camera, and verify visual output. Iterating on a shader without leaving the conversation is dramatically faster than the manual round-trip.
+- **Asset extraction / reverse-engineering pipelines** → [fmodel-mcp](/projects/fmodel-mcp), an MCP wrapper I built around FModel after the fourth time I caught myself doing the same export by hand. Concretely illustrates the *"build tooling after the third manual query"* principle below.
+- **Backend / scripts** → real logs, real test runners, real curl calls against real (or mocked) endpoints.
+- **Data work** → actual queries against actual databases (read-only, scoped credentials).
+
+These are the verification tools my projects happen to need. Yours will be different — pick the ones that match what you'd otherwise check by hand.
+
+The pattern: **whatever the manual verification step would be, find a way for Claude to do it programmatically and see the result.**
+
+### Spot the bottlenecks worth automating
+
+Pay attention to which checks you keep doing manually for Claude. *"Does it look right? Is the button aligned? Did the test pass? Did the script error out?"* Each of those is a hand-off that breaks flow.
+
+If a verification is **frequent and trivial**, it's a candidate for automation. Setting up Playwright once costs an afternoon; doing manual visual checks for every UI change costs hours every week.
+
+Two principles to keep this safe:
+
+1. **The user is always the final gate.** Automated verification doesn't replace human review — it removes the manual checks that don't need a human in the first place. You still validate the final result before commit.
+2. **Scope the tools' permissions.** Read-only credentials. Sandboxed test databases. Mocked payment APIs. Verification tools should let Claude *see* the system, not damage it.
+
+<Callout kind="note">
+**Why this matters more than prompt engineering.** A well-tooled Claude with a good context file beats a poorly-tooled Claude with the world's most carefully crafted prompt. The reason is structural: prompts compress intent into language; tools let Claude observe reality. Reality wins. If you take one thing from this article: **invest more time setting up tools than writing perfect prompts.** The prompts you write will improve naturally as you work; the tools you give Claude compound over every future session.
+</Callout>
+
+## 4. Context file discipline
+
+The context files are not documentation for humans — they're instructions for Claude. Write them the way you'd brief a new colleague who starts tomorrow: what's the project, how do we work, where did we leave off, what's decided and what's open.
+
+**`CLAUDE.md` — the permanent brief.** This is the most important file. It contains stack, conventions, module structure, naming rules, and patterns to follow. Claude Code reads it automatically at session start. Keep it under two or three pages. If it's longer, Claude may miss the important parts. Structure it with clear headers and short bullets — Claude parses structure better than prose.
+
+**`NEXT_STEPS.md` — the session handoff.** Update this at the end of every session. Three sections: what was done (changelog), what to do next (priorities), and known issues. This is what makes the next session start in ten seconds instead of ten minutes. Treat it as a handoff note to your future self — because that's exactly what it is.
+
+<Callout kind="note">
+**The five-minute rule.** If updating context files takes more than five minutes, you're writing too much. Be concise. *"Added cancel order endpoint. Needs validation for edge case X."* is better than a paragraph explaining the implementation.
+</Callout>
+
+## 5. Commit strategy
+
+Commit discipline is both a security practice and a quality practice. Claude Code generates code fast — the commit strategy must keep up, or review quality suffers.
+
+<CommitFlowDiagram />
+
+**Don't:** let Claude generate for thirty minutes, then commit everything as a single *"implement feature X"* changeset. The reviewer sees 800 lines, skims it, approves it. Bugs slip through.
+
+**Do:** after each logical piece (one function, one module, one fix), stop and commit. Five to eight commits per session is normal. Each one is a reviewable unit with a clear message describing *what* and *why*.
+
+A good commit sequence tells a story. For a new feature, something like:
+
+```
+a1b2c3d  Add Order model + migration
+d4e5f6a  Add Order schemas (request/response validation)
+b7c8d9e  Add /orders endpoints (CRUD + cancel)
+f0a1b2c  Add cancel validation: reject if status is SHIPPED
+e3d4c5b  Add unit tests for cancel edge cases
+```
+
+## 6. Anti-patterns — what not to do
+
+**Approve without reading.** Claude suggests a change, you say "yes" without understanding it. This is the #1 source of problems. If you don't understand the code, don't approve it. Take thirty seconds to read what Claude proposes. Ask *"why this approach?"* if something looks off. Redirect before it generates code, not after.
+
+**Let Claude decide architecture.** Claude suggests restructuring three modules to be "cleaner". You approve because it sounds good. Now twelve files have changed and you've introduced a pattern nobody else on the team — or your future self — knows. Architecture decisions are human decisions. Claude can propose, you evaluate, the decision goes in `DECISIONS.md`. Claude implements what was decided, not what it prefers.
+
+**Marathon sessions without commits.** Two hours with Claude, 1500 lines generated, zero commits. Now you have to review everything at once and figure out what goes where. Fatigue leads to sloppy commits. Every ten to twenty minutes, stop and commit what's done. Small diffs, clear messages, reviewable units. If something goes wrong, you roll back one commit instead of two hours of work.
+
+**Copy sensitive files into the workspace.** Copying a production `.env`, database dump, or certificate into the working directory where Claude operates. Claude reads it, processes it, and that content travels through external APIs. The workspace only contains mock values, example configs, and code. No real credentials, no production data, no certificates. Ever.
+
+**"It compiles, ship it."** Code compiles ≠ code works. Especially with generated code, where the structure may be correct but the logic subtly wrong. Run the actual scenario. Test the edge cases. If it's a UI change, look at it. If it's an API, call it. Compilation is necessary but not sufficient.
+
+## 7. Workspace and environment hygiene
+
+<Callout kind="note">
+**Never bring production data into the working directory.** No `.env` with real credentials. No database dumps. No certificates. No API keys. If Claude needs to understand an interface, give it the header file or the API spec — never the credentials to access it.
+</Callout>
+
+**The workspace should be disposable.** Everything in the working directory can be deleted and recreated from the repo. If losing the workspace would lose important work, something is wrong — that work should already be committed and pushed.
+
+**`.env.example` as the single source of truth.** Maintain a `.env.example` with every variable, safe defaults, and comments explaining what each one does. Claude can set up a working environment from this file alone. The real `.env` is never committed.
+
+## 8. Pro tips — things I learned the hard way
+
+**Use feature branches, even locally.** Before starting a new task, create a branch. Even if it never leaves your machine. Claude Code can generate a lot of code very fast — if something goes sideways, a `git checkout main` gets you back to a clean state in one second. Without a branch, you're untangling a diff. With a branch, you delete it and start fresh. It also makes it trivial to separate work into clean, reviewable changesets.
+
+**Always end your messages with open questions.** This is one of the highest-value habits you can build. After every Claude response, add a coletilla: *"How does this look to you? Would you do it differently? Is there a simpler or more elegant way? Am I missing something?"* Claude won't volunteer criticism of its own output unless you ask. These questions consistently surface better alternatives, edge cases you hadn't considered, and simpler approaches. It costs you five seconds. It saves you thirty minutes of rework.
+
+**Never start coding if you're not 100% clear on what you're building.** If the task is ambiguous, if the requirements are fuzzy, if you're not sure how a module should behave — stop. Ask questions. Ask Claude to explain the approach. Ask it to list the edge cases. Ask it to describe what the code will do *before* writing it. The cheapest code to fix is code that was never written wrong. Starting to code with unclear requirements is the fastest way to produce 200 lines you'll throw away.
+
+**Ask Claude to generate documentation — it's shockingly good at it.** Claude can produce architecture diagrams, decision logs, module overviews, and onboarding documents that are genuinely pleasant to read. Don't limit it to code. When you finish a feature, ask: *"Generate a document explaining the architecture of what we just built, with diagrams."* You'll get documentation that would take you hours to write manually — and it's based on the code Claude just saw, so it's accurate. Use this. Your future self will thank you.
+
+**Subagents — the reward for good planning.** When the plan is well-defined and the tasks are clearly independent, Claude Code can launch subagents that work on separate parts in parallel. For example: one subagent writes the model, another writes the tests, another updates the documentation. This can dramatically speed up a session — but it only works if the plan is precise and modular. If the task definition is vague or the boundaries between pieces are unclear, the subagents will produce code that overlaps or contradicts each other. Plan well, and you unlock parallelism. Plan poorly, and you multiply the mess.
+
+**Claude Code learns how you work.** Claude Code maintains a memory file about you — your preferences, your patterns, the way you like things structured. The more sessions you do, the better it adapts. Session ten feels noticeably different from session one: less correcting, less explaining, more flow. Another reason to invest in good context files and clear communication from the start — you're not just solving today's task, you're training a working dynamic that compounds over time.
+
+## Quick reference
+
+| Claude Code does | You own |
+|---|---|
+| Write and edit code | Review every piece of generated code |
+| Propose implementation plans | Make all architecture decisions |
+| Explain code and suggest improvements | Ensure commits are small and atomic |
+| Refactor and restructure (when asked) | Compile and test against the real stack |
+| Generate test scaffolding | Self-review the changeset before requesting approval |
+| Update documentation (you review) | Update context files (end of session) |
+| Read project context files | Verify behavior visually, not just syntax |
+| Works inside the conversation | Accountability stays with the developer |
+
+<Callout kind="note">
+**Good planning saves tokens — literally.** If you burn through your token allowance fast, the problem is almost never the tool — it's the input. Vague prompts produce wrong outputs, wrong outputs need corrections, corrections consume tokens. A well-structured prompt with clear context, a defined task, and explicit constraints typically gets it right on the first try. Investing two minutes in a precise prompt saves twenty minutes of back-and-forth — and the tokens that go with it. If you're consistently hitting your token limit, review how you're prompting before assuming you need a higher quota.
+</Callout>
+
+<Callout kind="aside">
+**On accountability.** Claude Code doesn't suffer the consequences of a mistake. You do. Errors will happen — that's why they're called errors, and no process eliminates them entirely. But *"Claude generated it"* is not an explanation, and it's certainly not an excuse. If your name is on the commit, you own it. The tools in this guide exist to help you catch problems early, not to shift responsibility. Claude is the copilot. The pilot signs the flight log.
+</Callout>
+
+## A note on tooling overload
+
+Spend any time on LinkedIn or Twitter and you'll see a new "essential" AI development tool every week. Hermes agents, custom MCP servers, elaborate context management systems, multi-agent orchestrations. Some of it is genuinely useful. Most of it isn't, for most projects.
+
+The honest answer: **most repos don't need most of this.**
+
+A small side project might be perfectly served by a single `CLAUDE.md` and nothing else. A large codebase might need everything I've described here plus things I haven't figured out yet. The signal isn't *"what tools is everyone else using"* — it's *"what is this specific project actually struggling with, and what's the minimum that solves it"*.
+
+When I described context files, the iteration cycle, skills, verification tools — I'm describing what works for *my* projects today. If you're working on something smaller, skip half of it. If you're working on something larger, this is probably not enough. Build what your repo needs, no more.
+
+<Callout kind="note">
+**The real best practice.** Understand the system, then decide what to copy. Cargo-culting workflows from blog posts — including this one — doesn't make your repo any better. Adapting the parts that solve your actual problems does.
+</Callout>
+
+This is a living document. I update it as I learn more from working on real projects with Claude Code. If something here proves wrong or incomplete, that's part of the process — the workflow that fits a project today won't necessarily fit it in six months. Read it accordingly.

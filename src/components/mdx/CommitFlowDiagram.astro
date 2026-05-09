@@ -1,0 +1,96 @@
+---
+/**
+ * Linear five-box flow used in the "A practical workflow for Claude Code"
+ * article: code generated → review → atomic commit → push → code review.
+ * Single-accent design — boxes are neutral; the human-vs-claude split lives
+ * in the caption under each box, not in colour.
+ */
+
+const steps = [
+  { title: 'Code generated', who: 'claude' },
+  { title: 'Review', who: 'you' },
+  { title: 'Atomic commit', who: 'you' },
+  { title: 'Push', who: 'you' },
+  { title: 'Code review', who: 'you + external' },
+];
+---
+
+<figure class="my-10 overflow-x-auto rounded border border-slate-800 bg-slate-900/40 px-4 py-6">
+  <svg
+    viewBox="0 0 800 200"
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Code generated → Review → Atomic commit → Push → Code review. Every step has a human checkpoint."
+    class="block w-full min-w-[680px]"
+  >
+    {steps.map((step, i) => {
+      const x = 20 + i * 156;
+      const arrowFromX = x + 130;
+      const arrowToX = arrowFromX + 21;
+      return (
+        <>
+          <rect
+            x={x}
+            y={60}
+            width={130}
+            height={64}
+            rx={8}
+            fill="#0f172a"
+            stroke="#334155"
+            stroke-width={1.25}
+          />
+          <text
+            x={x + 65}
+            y={90}
+            text-anchor="middle"
+            font-family="system-ui, sans-serif"
+            font-size={12}
+            font-weight={600}
+            fill="#e2e8f0"
+          >
+            {step.title}
+          </text>
+          <text
+            x={x + 65}
+            y={108}
+            text-anchor="middle"
+            font-family="system-ui, sans-serif"
+            font-size={10}
+            fill="#94a3b8"
+          >
+            {step.who}
+          </text>
+          {i < steps.length - 1 && (
+            <line
+              x1={arrowFromX + 2}
+              y1={92}
+              x2={arrowToX - 4}
+              y2={92}
+              stroke="#475569"
+              stroke-width={1.25}
+              marker-end="url(#cf-arrow)"
+            />
+          )}
+        </>
+      );
+    })}
+
+    <text
+      x={400}
+      y={170}
+      text-anchor="middle"
+      font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+      font-size={10}
+      letter-spacing={1}
+      fill="#64748b"
+    >
+      EVERY STEP HAS A HUMAN CHECKPOINT — NOTHING REACHES REVIEW UNREVIEWED
+    </text>
+
+    <defs>
+      <marker id="cf-arrow" markerWidth={8} markerHeight={6} refX={8} refY={3} orient="auto">
+        <path d="M0,0 L8,3 L0,6 z" fill="#475569" />
+      </marker>
+    </defs>
+  </svg>
+</figure>

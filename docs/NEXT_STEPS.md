@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: live on Vercel, content next.** **Steps 1–10 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, security headers (`vercel.json`) and an e2e test layer (Playwright + Chromium, 11 specs, all green in ~4 s), **and the site deployed at <https://www.luisep.dev>** with CSP + hygiene headers verified live. Aline writeup deferred until that project ships (moved to deferred / nice-to-haves). Next: **Step 11** — first AI article. Then projects pass, then visual decisions against the real URL.
+**Phase: first article live, more content next.** **Steps 1–11 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, security headers (`vercel.json`), e2e test layer (Playwright + Chromium, all green), site deployed at <https://www.luisep.dev>, **and the first AI article live at `/articles/practical-workflow-claude-code`** with a real `/articles` index, a new `<CommitFlowDiagram />` MDX component, and an article e2e spec covering the route, the diagram render, the linked own-projects, and the ES missing-translation fallback. Aline writeup deferred until that project ships (moved to deferred / nice-to-haves). Next: **Step 12** — other projects + remaining featured stubs.
 
 ---
 
@@ -138,14 +138,17 @@ Verification (live):
 - `curl -I https://www.luisep.dev/` returns `200` with `content-security-policy`, `permissions-policy`, `referrer-policy`, `x-content-type-options: nosniff`, and Vercel's own `strict-transport-security`. CSP `frame-src` allowlist limited to youtube-nocookie.com + player.vimeo.com as authored.
 - All 11 routes covered by the e2e suite (home EN/ES, projects index EN/ES, articles EN/ES, now, contact, project detail EN/ES, partial-bilingual fallback) plus `/sitemap-index.xml` return `200` against the live URL.
 
-### 11. First real content: AI / Claude Code article (EN) — pending
+### 11. First real content: AI / Claude Code article (EN) — done
 
-**Goal:** `/articles/<slug>` is live with one of the two AI articles already drafted by Luis (the Claude Code workflow guide *or* the "secured environment for Claude Code" piece — pick whichever is more refined). The second article follows in a separate iteration.
+The *practical workflow for Claude Code* draft (originally written for KEO, then re-pitched for the public audience) lives at `/articles/practical-workflow-claude-code` in EN. Editorial pass before migration: dropped Gerrit-specific framing; reordered review-tool list to put GitHub first; added a "who is this for" opening paragraph naming solo / team / in-between audiences; added an "even solo, treat your future self as the external reviewer" line in the iteration cycle; added a "these are examples, not the only valid options" line after the verification-tools list; gave Unity MCP and fmodel-mcp parity, both linking into the corresponding entry under [`/projects`](../src/pages/projects/index.astro).
 
-- Adapt the chosen draft into MDX. Use `<Callout />` where it earns its space; don't sprinkle it.
-- Index card on `/articles` with description and date.
-- Add an e2e spec exercising the article route + missing-translation fallback on the ES side until that translation lands.
-- **Validation:** article reads end-to-end; all anchors and links resolve; `pnpm test:e2e` includes the new spec and stays green.
+The article index at `/articles` (and `/es/articles`) now lists real entries from the collection — sorted by `publishedAt` desc, with title + description + date — replacing the *coming soon* placeholder. Empty state ("More articles on the way." / "Más artículos en camino.") wired through `articles.empty` in `src/i18n/ui.ts`. The ES route for this article renders the standard missing-translation notice (Spanish version is a follow-up).
+
+The section-5 commit-flow SVG was extracted into a new `<CommitFlowDiagram />` MDX component (registered in [`src/components/mdx/index.ts`](../src/components/mdx/index.ts)). Single-accent slate palette; categorical labels under each box do the work that colour did in the source draft. Same-commit doc updates in [ARCHITECTURE.md → "MDX components"](ARCHITECTURE.md) and [`content-authoring`](../.claude/skills/content-authoring/SKILL.md) → "MDX components in content".
+
+E2E spec at `tests/e2e/articles.spec.ts` exercises: index → detail navigation, presence of the `<CommitFlowDiagram />` SVG via its `aria-label`, both project links (`/projects/unity-mcp-port`, `/projects/fmodel-mcp`) inside the article body, and the ES missing-translation fallback on `/es/articles/practical-workflow-claude-code`.
+
+Both `articles/en/hello-world.mdx` and `articles/es/hello-world.mdx` placeholders deleted now that real content exists. The original draft (`a-practical-workflow-for-claude-code.html`) deleted from the repo root — it was scratch, never meant to ship.
 
 ### 12. Other projects + remaining featured stubs — pending
 
@@ -178,7 +181,8 @@ Verification (live):
 ## Side projects / nice-to-haves (deferred)
 
 - **Aline featured project writeup** — blocked on Luis's project shipping plus video assembly. When unblocked: add full narrative + `<VideoEmbed />` to `src/content/projects/{en,es}/aline-boss-fight.mdx`, set `tier: 'featured'`, drop the entry into `/projects` listing, add an e2e spec exercising the video poster + lazy load.
-- Second AI article (the "secured environment for Claude Code" piece — limit git, mock secrets, kernel limitations) once Step 11 lands the first one.
+- Second AI article (the "secured environment for Claude Code" piece — limit git, mock secrets, kernel limitations).
+- Spanish translation of `practical-workflow-claude-code` once tone is settled in EN.
 - Full ES translations of all featured project narratives and the launch articles.
 - Additional articles.
 - RSS feed for `/articles`.

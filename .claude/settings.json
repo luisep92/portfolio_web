@@ -47,7 +47,13 @@
       "Bash(bash -c 'for path in \"/\" \"/es/\" \"/projects/\" \"/articles/\" \"/now/\" \"/contact/\" \"/projects/fmodel-mcp/\" \"/es/projects/fmodel-mcp/\" \"/projects/unity-mcp-port/\" \"/es/projects/unity-mcp-port/\" \"/sitemap-index.xml\"; do code=$\\(curl -s -o /dev/null -w \"%{http_code}\" \"https://portfolio-web-psi-swart.vercel.app${path}\"\\); printf \"%-40s %s\\\\n\" \"$path\" \"$code\"; done')",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(bash -c ' *)"
+      "Bash(bash -c ' *)",
+      "Bash(curl -s https://www.luisep.dev/sitemap-0.xml)",
+      "Bash(git checkout *)",
+      "Bash(pnpm astro *)",
+      "Bash(curl -s http://localhost:4321/articles)",
+      "Bash(curl -s http://localhost:4321/articles/practical-workflow-claude-code -o /tmp/article.html -w \"%{http_code}\\\\n\")",
+      "Read(//tmp/**)"
     ]
   }
 }
