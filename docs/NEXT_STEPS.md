@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: first article live, more content next.** **Steps 1–11 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, security headers (`vercel.json`), e2e test layer (Playwright + Chromium, all green), site deployed at <https://www.luisep.dev>, **and the first AI article live at `/articles/practical-workflow-claude-code`** with a real `/articles` index, a new `<CommitFlowDiagram />` MDX component, and an article e2e spec covering the route, the diagram render, the linked own-projects, and the ES missing-translation fallback. Aline writeup deferred until that project ships (moved to deferred / nice-to-haves). Next: **Step 12** — other projects + remaining featured stubs.
+**Phase: first article live + structurally polished, discoverability next.** **Steps 1–11 complete**: full static + dynamic page pipeline, project listing, detail pages, MDX component library, slate base palette, security headers (`vercel.json`), e2e test layer (Playwright + Chromium, all green), site deployed at <https://www.luisep.dev>, **and the first AI article live at `/articles/practical-workflow-claude-code`** — initially shipped as a faithful migration, then structurally reworked after the live preview reading: typography prose class, solid Callout cards, IterationCycle timeline replacing the eleven-paragraph block, Takeaway pull-quotes (TL;DR + 2 mid-piece), AppliedHere reference cards linking abstract claims to artefacts in this very repo, h3 promotion in sections 6 + 8, real Step-11 commits replacing the fake example, a new "Things I don't use (and why)" section taking position on multi-agent setups / roleplay / cross-repo automation. The article-rework PR (`dev` branch, 8 commits at last count) is **pending merge by the user**. Aline writeup deferred until that project ships. Next: **Step 12** — discoverability (share buttons + OG metadata audit + Vercel Analytics), then **Step 13** other projects, then visual decisions, then a11y + Lighthouse.
 
 ---
 
@@ -150,7 +150,17 @@ E2E spec at `tests/e2e/articles.spec.ts` exercises: index → detail navigation,
 
 Both `articles/en/hello-world.mdx` and `articles/es/hello-world.mdx` placeholders deleted now that real content exists. The original draft (`a-practical-workflow-for-claude-code.html`) deleted from the repo root — it was scratch, never meant to ship.
 
-### 12. Other projects + remaining featured stubs — pending
+### 12. Discoverability — share buttons + OG metadata + Vercel Analytics — pending
+
+**Goal:** The article exists; now make it shareable to the right places and measurable. Three sub-tasks, each shippable as its own PR — keep them separate so a regression is easy to bisect:
+
+1. **OG metadata audit on `BaseLayout.astro`.** Verify `og:title`, `og:description`, `og:image`, `og:url`, `twitter:card`, `twitter:site`, `twitter:creator`. Articles need per-entry `og:title` / `og:description`; OG image strategy stays "one shared site image" for v1 (per-entry image generation is deferred — see open decisions). Audit *before* shipping share buttons so the previews aren't broken when traffic clicks through.
+2. **`<ShareLinks>` MDX component.** Twitter/X intent + LinkedIn intent + Hacker News submit + copy-link button (1 line of JS, no library). Rendered in `ArticleLayout` footer below the body. No tracking, no third-party widgets — plain `<a href>` to share intents. Optional follow-up: Mastodon + Bluesky if Luis decides they're worth it.
+3. **Vercel Analytics + close `DECISIONS.md` → "Analytics".** Drop in `@vercel/analytics` package, mount in `BaseLayout`. Free tier (2.5k events/mo) is plenty for v1. Privacy-clean by default (no cookies, no PII). Same-commit doc: move "Analytics" entry from open to closed in `DECISIONS.md` with the rationale ("Vercel-native, zero-infra, privacy-clean; revisit if traffic outgrows the free tier").
+
+- **Validation:** preview deployment shows the right OG card when the URL is pasted into Twitter/LinkedIn (use [https://cards-dev.twitter.com/validator](https://cards-dev.twitter.com/validator) or paste-and-preview in a draft); share buttons resolve to working share intents; Vercel Analytics dashboard records pageviews after merge.
+
+### 13. Other projects + remaining featured stubs — pending
 
 **Goal:** Compact cards for "other" projects (Hollow Knight mods, Bisbot, NEAT, EasyAvahi, rankedle), and stubs for any featured we haven't filled yet (María / Opositia per the public-repo decision; optionally this site itself with the meta angle). Author does a GitHub-pass first to decide which projects get in and at what tier.
 
@@ -158,15 +168,21 @@ Both `articles/en/hello-world.mdx` and `articles/es/hello-world.mdx` placeholder
 - For featured stubs: minimal narrative + "writeup pending" banner is acceptable, per [PRODUCT.md](PRODUCT.md) → "Scope (v1)".
 - **Validation:** index lists all entries in the right tier and order; new e2e spec asserts the Other section renders when populated.
 
-### 13. Close open visual decisions — pending
+### 14. Close open visual decisions — pending
 
-**Goal:** Accent color, typography, and the "one moment of character" picked. Each closed entry moves from [DECISIONS.md → Open](DECISIONS.md) into the body of the doc. Closing the accent unblocks the deferred `<Callout kind="warn">` variant from Step 8.
+**Goal:** Accent color, typography, the "one moment of character" on home, and the **ambient background texture** all picked. Each closed entry moves from [DECISIONS.md → Open](DECISIONS.md) into the body of the doc. Closing the accent unblocks the deferred coloured `<Callout>` variants from Step 8.
 
-- Prototype each candidate against a real page (likely against the deployed production URL post-Step 10); don't decide on swatches alone.
+The ambient bg texture is a new open sub-decision added during Step 11's polish loop: the original "no decorative gradients" rule was over-broad. It bans gradient heroes / SaaS color washes (correct), but a subtle site-wide ambient texture (grid / dots / noise) at low opacity, fixed (doesn't scroll), is a different category. Refining the rule and picking a concrete pattern are both done in this step. Order:
+
+1. PR-doc: refine the "Visual restrictions" entry in `DECISIONS.md` to distinguish gradient heroes from ambient texture.
+2. PR-code: prototype 2-3 patterns (linear-style glow, vercel-style grid, anthropic-style noise) on a preview branch; pick one with the user.
+3. Same with accent + typography + moment of character.
+
+- Prototype each candidate against a real page on the deployed production URL; don't decide on swatches alone.
 - Closing the moment of character means it's implemented, not just chosen.
-- **Validation:** DECISIONS.md no longer lists these as open; the site visually reflects the choice; e2e spec for any new interactive moment added.
+- **Validation:** `DECISIONS.md` no longer lists these as open; the site visually reflects the choice; e2e spec for any new interactive moment added.
 
-### 14. Lighthouse + accessibility pass — pending
+### 15. Lighthouse + accessibility pass — pending
 
 **Goal:** Lighthouse performance ≥ 90 on the home page (with any embedded video) and on a representative article. A11y issues from a manual pass and from `axe` are addressed or deferred with a written note.
 
@@ -186,21 +202,21 @@ Both `articles/en/hello-world.mdx` and `articles/es/hello-world.mdx` placeholder
 - Full ES translations of all featured project narratives and the launch articles.
 - Additional articles.
 - RSS feed for `/articles`.
-- Analytics (decision still open in [DECISIONS.md](DECISIONS.md)).
-- Open Graph image generation per article/project (vs. one shared OG image).
+- Per-article / per-project Open Graph image generation (vs. the one shared OG image set up in Step 12). Deferred unless an article gets organic traction worth optimising the share preview for.
 - [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp) at user level for Claude's visual verification across projects (the project-level Playwright install for e2e tests landed in Step 9; the MCP layer is the separate "Claude can see the rendered page during dev" capability).
 
 ---
 
 ## Open design decisions blocking specific steps
 
-These are tracked in [DECISIONS.md → Open](DECISIONS.md). Listed here so the dependency on Step 13 is visible:
+These are tracked in [DECISIONS.md → Open](DECISIONS.md). Listed here so the dependency on Step 14 is visible:
 
-- Accent color — blocks Step 13 closing and the deferred `<Callout kind="warn">` from Step 8.
-- Typography — blocks Step 13.
-- Moment of character on home — blocks Step 13.
-- Font hosting — depends on the typography pick; blocks Step 13.
-- Analytics — defaults to none for v1; can be revisited post-launch without blocking Step 10.
+- Accent color — blocks Step 14 closing and the deferred coloured `<Callout>` variants from Step 8.
+- Typography — blocks Step 14.
+- Moment of character on home — blocks Step 14.
+- Font hosting — depends on the typography pick; blocks Step 14.
+- **Ambient background texture pattern** — new open sub-decision out of the Step 11 polish loop. Requires reopening "Visual restrictions" in DECISIONS.md to distinguish gradient heroes (still banned) from subtle site-wide ambient texture (allowed at low opacity, fixed). Blocks Step 14.
+- Analytics — was open; closes as part of Step 12 (Vercel Analytics).
 
 ---
 
