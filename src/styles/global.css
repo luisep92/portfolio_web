@@ -151,4 +151,208 @@
     border-top: 1px solid var(--color-slate-900);
     margin-block: 3rem;
   }
+
+  /* ────────────────────────────────────────────────────────────────
+   * IterationCycle / Step — vertical timeline for step-by-step process.
+   * Numbering is automatic (counter). Connector line per step except
+   * the last. Pills for "who drives" use stroke variation, not hue
+   * (single-accent compliant).
+   * ──────────────────────────────────────────────────────────────── */
+  .mdx-body .iteration-cycle {
+    list-style: none;
+    padding-left: 0;
+    margin: 2.5rem 0;
+    counter-reset: step;
+  }
+
+  .mdx-body .iteration-cycle .iteration-step {
+    position: relative;
+    padding-left: 3rem;
+    padding-bottom: 1.75rem;
+    counter-increment: step;
+    margin-top: 0; /* step rhythm comes from padding-bottom, not margin */
+  }
+
+  .mdx-body .iteration-cycle .iteration-step::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-slate-900);
+    border: 1px solid var(--color-slate-700);
+    color: var(--color-slate-200);
+    font-weight: 600;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    z-index: 1;
+  }
+
+  .mdx-body .iteration-cycle .iteration-step::after {
+    content: '';
+    position: absolute;
+    left: calc(1rem - 0.5px);
+    top: 2.25rem;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-slate-800);
+  }
+
+  .mdx-body .iteration-cycle .iteration-step:last-child::after {
+    display: none;
+  }
+
+  .mdx-body .iteration-cycle .iteration-step__head {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .mdx-body .iteration-cycle .iteration-step__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-slate-100);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .mdx-body .iteration-cycle .iteration-step__body {
+    margin-top: 0.5rem;
+    color: var(--color-slate-300);
+    line-height: 1.7;
+  }
+
+  .mdx-body .iteration-cycle .iteration-step__body > * + * {
+    margin-top: 0.75rem;
+  }
+
+  .iteration-pill {
+    display: inline-block;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  .iteration-pill--you {
+    background: var(--color-slate-800);
+    color: var(--color-slate-100);
+    border: 1px solid var(--color-slate-700);
+  }
+
+  .iteration-pill--claude {
+    background: transparent;
+    color: var(--color-slate-300);
+    border: 1px solid var(--color-slate-700);
+  }
+
+  .iteration-pill--together {
+    background: transparent;
+    color: var(--color-slate-300);
+    border: 1px dashed var(--color-slate-700);
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+   * Takeaway — pull-quote-style block for the article's strongest
+   * single takeaways. Heavier than <Callout note>; thicker left rule,
+   * larger body type. Use sparingly.
+   * ──────────────────────────────────────────────────────────────── */
+  .mdx-body .takeaway {
+    margin: 2.5rem 0;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-slate-900);
+    border-left: 3px solid var(--color-slate-500);
+    border-radius: 0.25rem 0.5rem 0.5rem 0.25rem;
+  }
+
+  .mdx-body .takeaway__label {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-slate-400);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .mdx-body .takeaway__body {
+    color: var(--color-slate-100);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+
+  .mdx-body .takeaway__body > * + * {
+    margin-top: 0.5rem;
+  }
+
+  .mdx-body .takeaway__body ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+
+  .mdx-body .takeaway__body strong {
+    color: var(--color-slate-100);
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+   * AppliedHere — reference block linking abstract claims to concrete
+   * artefacts in this (or another) repo. Lighter than Callout, mono
+   * label kicker, custom list bullets.
+   * ──────────────────────────────────────────────────────────────── */
+  .mdx-body .applied-here {
+    margin: 1.5rem 0;
+    padding: 0.875rem 1.125rem;
+    background: var(--color-slate-900);
+    border: 1px solid var(--color-slate-800);
+    border-radius: 0.5rem;
+    font-size: 0.9375rem;
+  }
+
+  .mdx-body .applied-here__label {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-slate-400);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .mdx-body .applied-here__body {
+    color: var(--color-slate-300);
+  }
+
+  .mdx-body .applied-here__body > * + * {
+    margin-top: 0.5rem;
+  }
+
+  .mdx-body .applied-here__body ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .mdx-body .applied-here__body li {
+    padding-left: 1.25rem;
+    position: relative;
+  }
+
+  .mdx-body .applied-here__body li::before {
+    content: '↘';
+    position: absolute;
+    left: 0;
+    color: var(--color-slate-600);
+  }
+
+  .mdx-body .applied-here__body li::marker {
+    content: none;
+  }
 }

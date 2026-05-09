@@ -1,0 +1,16 @@
+---
+/**
+ * Vertical numbered timeline used for step-by-step processes inside MDX.
+ * Wraps a sequence of <Step> children. Numbering is automatic via a CSS
+ * counter on the <ol>, so authors don't pass `n=`.
+ *
+ * Visual / structural rules live in src/styles/global.css under the
+ * `.mdx-body .iteration-cycle` block (kept there with the other prose
+ * styles so timeline behaviour can't drift from the surrounding
+ * typography rhythm).
+ */
+---
+
+<ol class="iteration-cycle">
+  <slot />
+</ol>

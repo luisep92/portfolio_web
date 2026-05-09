@@ -126,6 +126,24 @@ A small contextual aside that doesn't belong in the main flow.
 <Figure src="/media/articles/foo/diagram.svg" caption="Pipeline diagram, simplified." />
 
 <CommitFlowDiagram />
+
+<IterationCycle>
+  <Step who="you" title="Align state">
+    Open the session by making sure context files are current.
+  </Step>
+  <Step who="claude" title="Plan">
+    Claude proposes an approach.
+  </Step>
+</IterationCycle>
+
+<Takeaway label="TL;DR">
+- **Atomic commits**: five to eight per session, each reviewable.
+- **The pilot signs the flight log**: Claude generates, you own.
+</Takeaway>
+
+<AppliedHere>
+- [`CLAUDE.md`](https://github.com/luisep92/portfolio_web/blob/main/CLAUDE.md) — the brief for this very repo.
+</AppliedHere>
 ```
 
 Conventions:
@@ -134,6 +152,9 @@ Conventions:
 - `<Callout kind>` accepts `note` (default — solid slate card with full border, use it when a paragraph genuinely needs to break flow) or `aside` (quieter left-rule, transparent bg, for tangential thoughts that shouldn't compete with the body). Coloured variants (`warn`/`success`/`important`) are intentionally deferred until the accent colour in DECISIONS.md is closed; until then, hierarchy comes from weight, padding, and border, not hue.
 - `<Figure>` requires `src` and `alt`; `caption` is optional. `alt` describes what's in the image (a11y); `caption` is shown to readers below.
 - `<CommitFlowDiagram />` is article-scoped (used in *practical workflow for Claude Code*). No props. Single-accent SVG; categorical labels live in text under each box, not in colour. If you need a different inline diagram, build a sibling component rather than parameterising this one — generic chart components tend to over-fit the first article and under-fit the second.
+- `<IterationCycle>` wraps a sequence of `<Step who="you|claude|together" title="…">` items. Numbering is automatic. Use it for step-by-step processes where the sequence and the *who-drives-each-step* both matter; for an unordered checklist, a plain `<ul>` is better.
+- `<Takeaway label="…">` — keep the body short and scannable (one line or a tight bullet list). Use **at most** one TL;DR up top per article and one or two mid-piece highlights; if every section gets one, the visual signal flattens and the reader stops reading them.
+- `<AppliedHere label="…">` — back an abstract claim with a concrete pointer (file in this repo, commit, PR, line range, log slice). Keep the body to a short `<ul>` of links. If a section needs more than ~3 pointers, the artefact probably belongs in the prose itself, not in a side card.
 
 To add a new MDX component:
 

@@ -1,0 +1,28 @@
+---
+/**
+ * "Applied here" reference block — small card with pointers from an
+ * abstract claim to a concrete artefact in this repo (file, commit, PR,
+ * git log slice). Use to back claims with evidence without padding the
+ * prose.
+ *
+ * `label` is the kicker shown above the list (mono, uppercase). Defaults
+ * to "Applied here ↘"; pass another short string for non-self-referential
+ * pointers (e.g. "See also ↗").
+ *
+ * The body is a slot — usually a short <ul> of links. Keep it tight; if
+ * a section needs more than ~3 pointers, reconsider whether the artefact
+ * belongs in the prose itself.
+ */
+interface Props {
+  label?: string;
+}
+
+const { label = 'Applied here ↘' } = Astro.props;
+---
+
+<aside class="applied-here">
+  <p class="applied-here__label">{label}</p>
+  <div class="applied-here__body">
+    <slot />
+  </div>
+</aside>

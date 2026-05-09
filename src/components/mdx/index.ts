@@ -2,6 +2,10 @@ import VideoEmbed from './VideoEmbed.astro';
 import Callout from './Callout.astro';
 import Figure from './Figure.astro';
 import CommitFlowDiagram from './CommitFlowDiagram.astro';
+import IterationCycle from './IterationCycle.astro';
+import Step from './Step.astro';
+import Takeaway from './Takeaway.astro';
+import AppliedHere from './AppliedHere.astro';
 
 /**
  * Components consumable from inside MDX without explicit imports.
@@ -19,4 +23,8 @@ export const mdxComponents = {
   Callout,
   Figure,
   CommitFlowDiagram,
+  IterationCycle,
+  Step,
+  Takeaway,
+  AppliedHere,
 };
