@@ -8,10 +8,18 @@ tags:
   - workflow
 ---
 
-Notes for engineers using Claude Code seriously on real projects — whether you ship solo, on a team, or somewhere in between. Solo devs: read "your teammate" or "the external reviewer" as "your future self pulling this repo in six months." Same discipline, same gates.
+Claude Code can ship in a few hours what used to take days. It can also generate 800 lines you can't explain, and bury you. Same tool, two outcomes — the difference is the discipline you bring. These are notes on what that discipline looks like in practice, written from real projects (some preparing to launch, some living as public repos that document how I learned something).
+
+<Takeaway label="TL;DR">
+- **Context files** — five markdown files in the repo. Five minutes per session to maintain.
+- **The cycle** — eleven short steps. Review at every checkpoint, never skip.
+- **Tools beat prompts** — give Claude what to verify with, not what to think about.
+- **Atomic commits** — five to eight per session, each reviewable.
+- **The pilot signs the flight log** — Claude generates, you own.
+</Takeaway>
 
 <Callout kind="aside">
-These are notes, not a manifesto. This is how I work with Claude Code today, based on real projects — some I'm preparing to launch, some that stay as public repos documenting how I learned something. It works well for me. Very well. But none of this is exact science, and you shouldn't follow it step by step — I don't even follow it identically across my own projects. Each repo gets the version of this that fits it. Read it as a starting point. Take what helps, leave what doesn't, build your own version.
+Notes for engineers using Claude Code seriously, whether you ship solo, on a team, or somewhere in between. Solo devs: read "your teammate" or "the external reviewer" as "your future self pulling this repo in six months." Same discipline, same gates. None of this is exact science — I don't even follow it identically across my own projects. Each repo gets the version of this that fits it. Read it as a starting point.
 </Callout>
 
 ## The golden rule
@@ -36,9 +44,16 @@ Without context files, every session starts with ten minutes of "here's the proj
 **Keep it lean.** A 50-page `CLAUDE.md` that nobody updates is worse than no context at all — Claude may follow outdated instructions. Keep files focused, factual, and current. If a section hasn't been updated in months, delete it or mark it as potentially stale.
 </Callout>
 
+<AppliedHere>
+- [`CLAUDE.md`](https://github.com/luisep92/portfolio_web/blob/main/CLAUDE.md) — the brief for **this very portfolio repo**. Pure router (pointers to docs); zero technical content that could drift.
+- [`docs/DECISIONS.md`](https://github.com/luisep92/portfolio_web/blob/main/docs/DECISIONS.md) — every closed architectural decision with its *why*, plus an "Open" section at the bottom for what's still being decided.
+- [`docs/NEXT_STEPS.md`](https://github.com/luisep92/portfolio_web/blob/main/docs/NEXT_STEPS.md) — the state-of-the-build, updated at the end of every session. This article landed as Step 11.
+- [`.env.example`](https://github.com/luisep92/portfolio_web/blob/main/.env.example) — the entire env contract for the site. Three lines, one comment. The real `.env` is never committed.
+</AppliedHere>
+
 ### Skills — repo-specific operational knowledge
 
-I've been adding a layer beyond context files: **skills**. A skill is a markdown file that documents a specific operational flow in a specific repo — written *after* I've completed that flow at least once, not before.
+Beyond context files there's another layer: **skills**. A skill is a markdown file that documents a specific operational flow in a specific repo — written *after* I've completed that flow at least once, not before.
 
 Examples from real projects:
 
@@ -53,21 +68,52 @@ Skills live in a `.claude/skills/` directory and Claude reads the relevant ones 
 **The key discipline:** write the skill *after* you've done the thing, not before. A skill written speculatively is just docs; a skill written after the first painful pass is operational gold.
 </Callout>
 
+<AppliedHere>
+- [`docs-governance` skill](https://github.com/luisep92/portfolio_web/blob/main/.claude/skills/docs-governance/SKILL.md) — *what fact goes to which doc*, pre-commit checklist, what NOT to put in `CLAUDE.md` or memory. Written after the third time I had to course-correct on doc duplication.
+- [`content-authoring` skill](https://github.com/luisep92/portfolio_web/blob/main/.claude/skills/content-authoring/SKILL.md) — slug conventions, frontmatter, MDX components, when to promote a project from `other` to `featured`. Written after authoring this article.
+</AppliedHere>
+
 ## 2. The iteration cycle — one session, step by step
 
 Every session with Claude Code should follow this cycle. Some steps are done by Claude, some by you, some together. The key discipline: **don't skip the review steps**. Claude Code is fast — dangerously fast. If you let it run without checkpoints, you'll end up with hundreds of lines of code you don't understand.
 
-1. **Align state** *(you)* — open the session by making sure context files are current. If `NEXT_STEPS.md` is stale, update it. If the last session introduced new conventions, update `CLAUDE.md`. Claude will read these files; if they're wrong, it starts wrong.
-2. **Define the task** *(together)* — tell Claude what you want to achieve this session. Be specific: *"add the cancel-order endpoint with validation and error handling"*, not *"work on orders"*. If the task is large, ask Claude to break it down first.
-3. **Plan** *(claude)* — Claude proposes an approach: which files to touch, what the implementation looks like, what order to follow. For small tasks (one file, one function), this is implicit. For anything touching multiple modules, ask for an explicit plan.
-4. **Review the plan** *(you)* — **this is where most mistakes are prevented.** Read what Claude proposes. Does it match the architecture? Does it follow conventions? Is it overcomplicating something? Correct now — not after 300 lines of code.
-5. **Code** *(claude)* — Claude writes the implementation. For large tasks, ask it to work in stages — don't let it generate everything in one shot. Stage boundaries are natural review points.
-6. **Review the code** *(you)* — read the generated code. Understand it. If you can't explain what a function does, you can't commit it. This is not optional — it's the core of the security model. Claude generates fast; you validate thoroughly.
-7. **Test** *(you)* — compile and verify the code works. Run existing tests to check nothing is broken. If your project touches services that are sensitive, costly, or that you don't want exposed to an AI agent's environment — payment APIs, paid LLM keys, internal modules you can't share publicly — mock them. Use a `.env` to keep real credentials out of the working directory entirely. Claude doesn't need real Stripe access to verify your code calls it correctly; it needs a stub that responds with the right shape. The principle: **isolate the dangerous edges, not the whole environment**. A full sandboxed VM is overkill for most projects; a discipline of mocked services and untracked secrets is enough.
-8. **Visual verification** *(you)* — if the change affects output or behavior, verify visually. Don't trust that "it compiles" means "it works". Run the actual scenario end-to-end.
-9. **Document** *(together)* — ask Claude to update `NEXT_STEPS.md` with what was done, decisions made, and what to do next. Review the update — Claude tends to be verbose; trim to what matters.
-10. **Commit & organize** *(you)* — commits must be small, atomic, one concern each. Claude Code advances very fast — if you don't commit frequently, you'll end up with a massive diff that's impossible to review. Organize the commits to tell a story: migration first, then model, then logic, then tests. Each commit should be a reviewable unit with a clear message.
-11. **Push & self-review** *(you)* — push to your code review tool — GitHub, GitLab, Gerrit, whatever you use. Then open the changeset (or pull request, or merge request) in the web UI and review your own code as if you were the external reviewer. Even solo, treat your future self pulling this PR in six months as the external reviewer. Different context catches different things. Approve only when you're confident.
+<IterationCycle>
+  <Step who="you" title="Align state">
+    Open the session by making sure context files are current. If `NEXT_STEPS.md` is stale, update it. If the last session introduced new conventions, update `CLAUDE.md`. Claude will read these files; if they're wrong, it starts wrong.
+  </Step>
+  <Step who="together" title="Define the task">
+    Tell Claude what you want to achieve this session. Be specific: *"add the cancel-order endpoint with validation and error handling"*, not *"work on orders"*. If the task is large, ask Claude to break it down first.
+  </Step>
+  <Step who="claude" title="Plan">
+    Claude proposes an approach: which files to touch, what the implementation looks like, what order to follow. For small tasks (one file, one function), this is implicit. For anything touching multiple modules, ask for an explicit plan.
+  </Step>
+  <Step who="you" title="Review the plan">
+    **This is where most mistakes are prevented.** Read what Claude proposes. Does it match the architecture? Does it follow conventions? Is it overcomplicating something? Correct now — not after 300 lines of code.
+  </Step>
+  <Step who="claude" title="Code">
+    Claude writes the implementation. For large tasks, ask it to work in stages — don't let it generate everything in one shot. Stage boundaries are natural review points.
+  </Step>
+  <Step who="you" title="Review the code">
+    Read the generated code. Understand it. If you can't explain what a function does, you can't commit it. This is not optional — it's the core of the security model. Claude generates fast; you validate thoroughly.
+  </Step>
+  <Step who="you" title="Test">
+    Compile and verify the code works. Run existing tests to check nothing is broken. If your project touches services that are sensitive, costly, or that you don't want exposed to an AI agent's environment — payment APIs, paid LLM keys, internal modules you can't share publicly — mock them. Use a `.env` to keep real credentials out of the working directory entirely. Claude doesn't need real Stripe access to verify your code calls it correctly; it needs a stub that responds with the right shape.
+
+    The principle: **isolate the dangerous edges, not the whole environment**. A full sandboxed VM is overkill for most projects; a discipline of mocked services and untracked secrets is enough.
+  </Step>
+  <Step who="you" title="Visual verification">
+    If the change affects output or behavior, verify visually. Don't trust that "it compiles" means "it works". Run the actual scenario end-to-end.
+  </Step>
+  <Step who="together" title="Document">
+    Ask Claude to update `NEXT_STEPS.md` with what was done, decisions made, and what to do next. Review the update — Claude tends to be verbose; trim to what matters.
+  </Step>
+  <Step who="you" title="Commit & organize">
+    Commits must be small, atomic, one concern each. Claude Code advances very fast — if you don't commit frequently, you'll end up with a massive diff that's impossible to review. Organize the commits to tell a story: migration first, then model, then logic, then tests. Each commit should be a reviewable unit with a clear message.
+  </Step>
+  <Step who="you" title="Push & self-review">
+    Push to your code review tool — GitHub, GitLab, Gerrit, whatever you use. Then open the changeset (or pull request, or merge request) in the web UI and review your own code as if you were the external reviewer. Even solo, treat your future self pulling this PR in six months as the external reviewer. Different context catches different things. Approve only when you're confident.
+  </Step>
+</IterationCycle>
 
 <Callout kind="note">
 **Why atomic commits matter so much here.** Claude Code can generate hundreds of lines in a minute. If commits pile up, you get one giant changeset that nobody — including you — can review properly. Frequent small commits force you to understand each piece as it's produced. It also makes the external reviewer's job dramatically easier: five focused commits versus one monolith.
@@ -102,9 +148,9 @@ Two principles to keep this safe:
 1. **The user is always the final gate.** Automated verification doesn't replace human review — it removes the manual checks that don't need a human in the first place. You still validate the final result before commit.
 2. **Scope the tools' permissions.** Read-only credentials. Sandboxed test databases. Mocked payment APIs. Verification tools should let Claude *see* the system, not damage it.
 
-<Callout kind="note">
-**Why this matters more than prompt engineering.** A well-tooled Claude with a good context file beats a poorly-tooled Claude with the world's most carefully crafted prompt. The reason is structural: prompts compress intent into language; tools let Claude observe reality. Reality wins. If you take one thing from this article: **invest more time setting up tools than writing perfect prompts.** The prompts you write will improve naturally as you work; the tools you give Claude compound over every future session.
-</Callout>
+<Takeaway label="Why this matters more than prompt engineering">
+A well-tooled Claude with a good context file beats a poorly-tooled Claude with the world's most carefully crafted prompt. Prompts compress intent into language; tools let Claude observe reality. **Reality wins.** Invest more time setting up tools than writing perfect prompts — prompts improve naturally as you work; tools compound over every future session.
+</Takeaway>
 
 ## 4. Context file discipline
 
@@ -118,6 +164,10 @@ The context files are not documentation for humans — they're instructions for 
 **The five-minute rule.** If updating context files takes more than five minutes, you're writing too much. Be concise. *"Added cancel order endpoint. Needs validation for edge case X."* is better than a paragraph explaining the implementation.
 </Callout>
 
+<AppliedHere>
+- [`docs/NEXT_STEPS.md`](https://github.com/luisep92/portfolio_web/blob/main/docs/NEXT_STEPS.md) — the live handoff doc for this site. Top header is the current state in one paragraph; below it, every step is "what was done" + "validation criteria". You could pick this repo up cold from this file alone.
+</AppliedHere>
+
 ## 5. Commit strategy
 
 Commit discipline is both a security practice and a quality practice. Claude Code generates code fast — the commit strategy must keep up, or review quality suffers.
@@ -128,15 +178,20 @@ Commit discipline is both a security practice and a quality practice. Claude Cod
 
 **Do:** after each logical piece (one function, one module, one fix), stop and commit. Five to eight commits per session is normal. Each one is a reviewable unit with a clear message describing *what* and *why*.
 
-A good commit sequence tells a story. For a new feature, something like:
+A good commit sequence tells a story. The three atomic commits that shipped *this very article*:
 
 ```
-a1b2c3d  Add Order model + migration
-d4e5f6a  Add Order schemas (request/response validation)
-b7c8d9e  Add /orders endpoints (CRUD + cancel)
-f0a1b2c  Add cancel validation: reject if status is SHIPPED
-e3d4c5b  Add unit tests for cancel edge cases
+ca69a9f  Add practical-workflow article + CommitFlowDiagram MDX component
+1f4d9b0  Wire /articles index to list real entries from the collection
+0f4ed54  Add e2e spec for practical-workflow article + close Step 11
 ```
+
+Three layers, in dependency order: **content** first (the MDX + the diagram component), then **routing** (the index page that lists it), then **tests** (the e2e spec verifying it works). Each commit is small enough to review carefully without fatigue. Each one passes its own check on CI in isolation. Each one would still make sense as a standalone PR.
+
+<AppliedHere>
+- [Step 11 commit range](https://github.com/luisep92/portfolio_web/compare/86cb7c9~3...86cb7c9) — the three commits above as a diff range; click any commit to see its full message and reviewable diff.
+- [Full git history of this site](https://github.com/luisep92/portfolio_web/commits/main) — every step of building this portfolio has been a feature branch + PR with atomic commits. The history reads as the real changelog.
+</AppliedHere>
 
 ## 6. Anti-patterns — what not to do
 
@@ -159,6 +214,11 @@ e3d4c5b  Add unit tests for cancel edge cases
 **The workspace should be disposable.** Everything in the working directory can be deleted and recreated from the repo. If losing the workspace would lose important work, something is wrong — that work should already be committed and pushed.
 
 **`.env.example` as the single source of truth.** Maintain a `.env.example` with every variable, safe defaults, and comments explaining what each one does. Claude can set up a working environment from this file alone. The real `.env` is never committed.
+
+<AppliedHere>
+- [`.env.example`](https://github.com/luisep92/portfolio_web/blob/main/.env.example) — three lines. The site has no required env vars at v1; the file documents that explicitly so a fresh clone has nothing to set up before running `pnpm dev`.
+- [`.gitignore`](https://github.com/luisep92/portfolio_web/blob/main/.gitignore) — `.env` and `.env.*` excluded except `.env.example`. Belt-and-braces: even if someone accidentally creates `.env.production`, git refuses to stage it.
+</AppliedHere>
 
 ## 8. Pro tips — things I learned the hard way
 
@@ -191,9 +251,9 @@ e3d4c5b  Add unit tests for cancel edge cases
 **Good planning saves tokens — literally.** If you burn through your token allowance fast, the problem is almost never the tool — it's the input. Vague prompts produce wrong outputs, wrong outputs need corrections, corrections consume tokens. A well-structured prompt with clear context, a defined task, and explicit constraints typically gets it right on the first try. Investing two minutes in a precise prompt saves twenty minutes of back-and-forth — and the tokens that go with it. If you're consistently hitting your token limit, review how you're prompting before assuming you need a higher quota.
 </Callout>
 
-<Callout kind="aside">
-**On accountability.** Claude Code doesn't suffer the consequences of a mistake. You do. Errors will happen — that's why they're called errors, and no process eliminates them entirely. But *"Claude generated it"* is not an explanation, and it's certainly not an excuse. If your name is on the commit, you own it. The tools in this guide exist to help you catch problems early, not to shift responsibility. Claude is the copilot. The pilot signs the flight log.
-</Callout>
+<Takeaway label="On accountability">
+Claude Code doesn't suffer the consequences of a mistake. You do. *"Claude generated it"* is not an explanation, and it's certainly not an excuse. If your name is on the commit, you own it. The tools in this guide exist to help you catch problems early, not to shift responsibility. **Claude is the copilot. The pilot signs the flight log.**
+</Takeaway>
 
 ## A note on tooling overload
 
