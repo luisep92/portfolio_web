@@ -248,6 +248,22 @@ To add a new MDX component:
 
 ---
 
+## Security posture
+
+Static site on Vercel — minimal attack surface. What's configured:
+
+- **Response headers** in [`vercel.json`](../vercel.json):
+  - `Content-Security-Policy`: `'self'` for scripts / styles / images / fonts / `connect`; `frame-src` only the YouTube and Vimeo embed origins used by `<VideoEmbed />`; `'unsafe-inline'` for styles only (Astro emits some inline `<style>`); `frame-ancestors 'none'` prevents the site from being iframed; `object-src 'none'`; `base-uri 'self'`; `form-action 'self'`.
+  - `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` denying `camera`, `microphone`, `geolocation`, `payment` (we never use them).
+- HTTPS, HSTS, DDoS at the edge: Vercel defaults — no extra config.
+- No secrets in repo (see [DECISIONS.md → "Public repo from day one"](DECISIONS.md)); real env values in Vercel project settings.
+- `mailto:` link in `/contact` is a known scraper vector — accepted. JS obfuscation would violate the plain-text contact rule. Filter at the inbox if spam volume becomes real.
+- CSP `img-src` is `'self' data:` — no external image origins. If a project entry ever needs a remote `coverImage`, either self-host it under `/public/media/...` (preferred) or extend `img-src` in `vercel.json` to the specific origin.
+
+Verify headers post-deploy with `curl -I https://<url>` and look for `Content-Security-Policy` + the others. Updates to `vercel.json` require a redeploy to take effect.
+
+---
+
 ## Cold-clone bootstrap
 
 Steps for someone (or future-Luis) cloning the repo and running it locally for the first time. Keep this list current — if a step changes, update it in the same commit.
