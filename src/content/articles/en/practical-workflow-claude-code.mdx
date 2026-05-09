@@ -268,6 +268,33 @@ Claude Code maintains a memory file about you — your preferences, your pattern
 Claude Code doesn't suffer the consequences of a mistake. You do. *"Claude generated it"* is not an explanation, and it's certainly not an excuse. If your name is on the commit, you own it. The tools in this guide exist to help you catch problems early, not to shift responsibility. **Claude is the copilot. The pilot signs the flight log.**
 </Takeaway>
 
+## Things I don't use (and why)
+
+The guide above is shaped by Claude Code because that's what I use. A few related setups exist that I have looked at and decided not to adopt — listing them is more honest than pretending I evaluated everything.
+
+### Other coding agents
+I don't know how well this workflow holds up against Cursor, Aider, GitHub Copilot's agent mode, or any of the new agents that ship monthly. I'd be surprised if a capable LLM can't work with the same context-files + iteration-cycle setup, but I haven't tested it personally. Take the specifics for what they are: tested on Claude Code; transferable in spirit to anything that can read a `CLAUDE.md`.
+
+### Multi-agent "AI company" setups
+There's a school where you define roles — CEO agent, developer agent, QA agent, marketing agent — and orchestrate them as a synthetic team. I don't. Claude (Opus, in my case) already launches subagents when the task is genuinely parallel-shaped; that covers what I'd get from the orchestration layer without the role-play overhead. If the task isn't parallel, more agents don't make it parallel — they multiply confusion.
+
+### Roleplay prompting
+*"You are a senior software engineer at..."* — Claude is already a senior software engineer for the purposes of writing code. Telling it so doesn't add capability; it conditions the output in unhelpful ways (more cautious tone, more scaffolding, more *"as a senior engineer I would..."* preamble). And it's redundant — the agent already knows you through its memory of your feedback (see [Section 8 → "Claude Code learns how you work"](#claude-code-learns-how-you-work)) and the conventions in `CLAUDE.md`. The repo is the role.
+
+The cases where roleplay-style prompting *does* pay aren't really roleplay:
+
+- **Format constraints** — *"You're a Discord bot, replies under 2000 chars, never wrap output in code blocks."* That's a schema, not a persona.
+- **Style anchoring for creative output** — *"Write in the voice of a 1940s technical manual."* For code, the agent infers style from your repo; for prose with a strong tonal anchor, the explicit instruction earns its place.
+
+<AppliedHere>
+- [`Bisbot/src/GptWrapper.py`](https://github.com/luisep92/Bisbot/blob/main/src/GptWrapper.py) — a Discord bot I built where the GPT wrapper sets up exactly that kind of format-as-persona prompt. The *"you are X"* framing earns its place because the output is going into a chat client with hard constraints, not into a code review.
+</AppliedHere>
+
+### Cross-repo agents that act unsupervised
+Tools that run an agent continuously over your repositories and let it commit, open PRs, or decide what to work on without you in the loop. I don't. Each repo is its own session, and every commit goes through me before it lands on `main`. My git workflow (branch + PR + e2e + preview, see [`docs/DECISIONS.md`](https://github.com/luisep92/portfolio_web/blob/main/docs/DECISIONS.md)) is built around that as a hard constraint, not a checkpoint an automated agent could plausibly bypass.
+
+This isn't a judgement on people who use those setups — they may be solving problems I don't have. It's an honest statement of what's in this guide and what isn't.
+
 ## A note on tooling overload
 
 Spend any time on LinkedIn or Twitter and you'll see a new "essential" AI development tool every week. Hermes agents, custom MCP servers, elaborate context management systems, multi-agent orchestrations. Some of it is genuinely useful. Most of it isn't, for most projects.
