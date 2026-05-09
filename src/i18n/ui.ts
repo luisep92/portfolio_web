@@ -30,6 +30,9 @@ export const ui = {
     'home.placeholder.body': 'Site under construction.',
     'placeholder.coming_soon': 'Coming soon.',
     'now.last_updated': 'Last updated',
+    'projects.featured_heading': 'Featured',
+    'projects.other_heading': 'Other technical work',
+    'projects.empty': 'More featured projects on the way.',
   },
   es: {
     'site.title': 'Luis Escolano',
@@ -47,6 +50,9 @@ export const ui = {
     'home.placeholder.body': 'Sitio en construcción.',
     'placeholder.coming_soon': 'Próximamente.',
     'now.last_updated': 'Última actualización',
+    'projects.featured_heading': 'Destacados',
+    'projects.other_heading': 'Otros trabajos técnicos',
+    'projects.empty': 'Más proyectos destacados en camino.',
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

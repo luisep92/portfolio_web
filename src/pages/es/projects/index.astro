@@ -1,15 +1,107 @@
 ---
+import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Container from '../../../components/ui/Container.astro';
-import { getLocaleFromUrl, t } from '../../../i18n/utils';
+import { isVisible, entryIdToParts } from '../../../lib/content';
+import { getLocaleFromUrl, localizedPath, t } from '../../../i18n/utils';
 
 const locale = getLocaleFromUrl(Astro.url);
 const heading = t(locale, 'nav.projects');
+
+const all = await getCollection('projects', (entry) => {
+  const { locale: entryLocale } = entryIdToParts(entry.id);
+  return entryLocale === locale && isVisible(entry);
+});
+
+type ProjectEntry = CollectionEntry<'projects'>;
+const byOrder = (a: ProjectEntry, b: ProjectEntry) => a.data.order - b.data.order;
+const featured = all.filter((e) => e.data.tier === 'featured').sort(byOrder);
+const other = all.filter((e) => e.data.tier === 'other').sort(byOrder);
+
+function detailHref(entry: ProjectEntry): string {
+  const { slug } = entryIdToParts(entry.id);
+  return localizedPath(`/projects/${slug}`, locale);
+}
 ---
 
 <BaseLayout title={`${heading} — ${t(locale, 'site.title')}`}>
   <Container class="py-24">
     <h1 class="text-4xl font-semibold tracking-tight">{heading}</h1>
-    <p class="mt-4 text-neutral-400">{t(locale, 'placeholder.coming_soon')}</p>
+
+    <section class="mt-16">
+      <h2 class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+        {t(locale, 'projects.featured_heading')}
+      </h2>
+
+      {featured.length > 0 ? (
+        <ul class="mt-6 border-t border-neutral-900">
+          {featured.map((entry) => (
+            <li>
+              <a
+                href={detailHref(entry)}
+                class="group block border-b border-neutral-900 py-6 transition-colors hover:bg-neutral-900/40"
+              >
+                <div class="flex items-baseline justify-between gap-4">
+                  <h3 class="text-xl font-medium text-neutral-100">
+                    {entry.data.title}
+                    <span class="ml-1 inline-block opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100">
+                      →
+                    </span>
+                  </h3>
+                  {entry.data.year && (
+                    <span class="shrink-0 text-sm text-neutral-500">{entry.data.year}</span>
+                  )}
+                </div>
+                <p class="mt-2 leading-relaxed text-neutral-400">{entry.data.summary}</p>
+                {entry.data.role && (
+                  <p class="mt-3 text-xs uppercase tracking-wide text-neutral-500">
+                    {entry.data.role}
+                  </p>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="mt-6 text-neutral-400">{t(locale, 'projects.empty')}</p>
+      )}
+    </section>
+
+    {other.length > 0 && (
+      <section class="mt-20">
+        <h2 class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+          {t(locale, 'projects.other_heading')}
+        </h2>
+        <ul class="mt-6 space-y-3 text-sm">
+          {other.map((entry) => {
+            const repo = entry.data.links?.repo;
+            const article = entry.data.links?.article;
+            const demo = entry.data.links?.demo;
+            const externalHref = repo ?? article ?? demo;
+            const meta = [entry.data.year, entry.data.role].filter(Boolean).join(' · ');
+            return (
+              <li class="leading-relaxed text-neutral-400">
+                <span class="text-neutral-200">{entry.data.title}</span>
+                {meta && <span class="text-neutral-500"> — {meta}</span>}
+                <span> — {entry.data.summary}</span>
+                {externalHref && (
+                  <>
+                    {' '}
+                    <a
+                      href={externalHref}
+                      class="text-neutral-300 underline-offset-4 hover:text-neutral-100 hover:underline"
+                      rel="noopener"
+                      target="_blank"
+                    >
+                      ↗
+                    </a>
+                  </>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    )}
   </Container>
 </BaseLayout>

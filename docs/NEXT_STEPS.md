@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: scaffolding.** Docs harness in place. **Steps 1–6 complete**: full static + dynamic page pipeline. Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; `pnpm build` clean. Content collections defined for `articles` and `projects` with locale-folder layout. i18n plumbing + `<LocaleToggle />` wired through `BaseLayout` + `Header` + `Footer` + `Container`. Static pages live in both locales (Home, Now, Contact, Projects index, Articles index). Dynamic `[slug]` pages for projects (featured tier) and articles work in both locales, including the missing-translation notice for entries that exist in only one language. 14 pages currently built; two real featured project entries seeded (`fmodel-mcp` bilingual, `unity-mcp port` EN-only). Next: **Step 7** — Projects index card rendering (Featured cards + Other one-liners), replacing the "coming soon" placeholder.
+**Phase: scaffolding.** Docs harness in place. **Steps 1–7 complete**: full static + dynamic page pipeline, with project listing and detail pages live. Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; `pnpm build` clean. Content collections, i18n plumbing, BaseLayout chrome, missing-translation fallback, project index cards (Featured + Other sections), all working in both locales. Header nav now includes Home alongside Projects/Articles/Now/Contact. 14 pages currently built; two featured project entries seeded (`fmodel-mcp`, `unity-mcp port`). Next: **Step 8** — MDX components (`<VideoEmbed />`, `<Callout />`, `<Figure />`) wired into the rendering pipeline.
 
 ---
 
@@ -95,12 +95,19 @@ Verification:
 - `pnpm build` produces 14 pages including all four `[slug]` cases.
 - Spot-check on built HTML: `/projects/fmodel-mcp` and `/es/projects/fmodel-mcp` render the entry; `/projects/unity-mcp-port` renders the entry; `/es/projects/unity-mcp-port` renders the Spanish "Aún no disponible" notice with the correct title pulled from the EN entry and a link back to the EN page.
 
-### 7. Project index + cards — pending
-**Goal:** `/projects` lists Featured projects with rich cards and Other projects as compact one-liners. Same structure under `/es/projects`.
+### 7. Project index + cards — done
 
-- Featured card: cover image, title, year, summary, link to detail page.
-- Other one-liner: title — year — role — summary — link out (to repo or external article).
-- **Validation:** Index renders correctly with at least one Featured stub and one Other stub. Hover states are intentional (no defaults).
+`/projects` and `/es/projects` now render two sections: a Featured list (richer cards: title with hover-arrow, year, summary, role) and an Other list (compact one-liners with `title — year · role — summary` plus a `↗` external link). Section headings come from `projects.featured_heading` / `projects.other_heading` in `src/i18n/ui.ts`. Empty Other section is hidden entirely; empty Featured falls back to a `projects.empty` line.
+
+The page filters by `entryIdToParts(entry.id).locale === locale` so each index only lists entries authored in that locale. Cross-locale discovery (showing EN-only entries on the ES page with a "(only English)" hint) is deferred — when it matters we'll revisit.
+
+Cover images intentionally omitted — none of the seeded entries carry one yet, and the visual spec is "sober text-card with one moment of motion." The arrow that slides in on hover is that moment for these cards.
+
+Verification:
+
+- `pnpm astro check` clean (28 files; 0/0/0).
+- `pnpm build` produces 14 pages.
+- Spot-check on built HTML: `/projects` lists both `fmodel-mcp` and `unity-mcp port` under "Featured"; `/es/projects` lists only `fmodel-mcp` under "Destacados" (unity-mcp-port has no ES entry; users hitting `/es/projects/unity-mcp-port` directly still get the missing-translation notice from Step 6).
 
 ### 8. MDX components — pending
 **Goal:** `<VideoEmbed />`, `<Callout />`, `<Figure />` exist and are wired into the MDX rendering pipeline.
