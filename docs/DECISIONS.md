@@ -70,6 +70,14 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 
 ---
 
+### Base palette: Tailwind's `slate-*` scale (deep blue)
+
+**Rule:** The dark palette uses Tailwind's `slate-*` scale across the board — `slate-950` for the body background, `slate-900` for subtle borders, climbing up to `slate-100` for primary text. No `neutral-*` or other gray scales in `src/`. If a stronger blue saturation is ever wanted, override the relevant token in `@theme` inside `src/styles/global.css` (e.g. `--color-slate-950`); don't introduce a parallel scale.
+
+**Why:** Pure black (`neutral-950`) read flat under the typography we're using; slate's subtle blue tilt gives the page enough weight to feel like a deliberate surface without slipping into "SaaS-landing colorful" territory. The two Tailwind scales are tonally parallel — the swap was visually noticeable only at the 800–950 range, with text-contrast essentially unchanged. Confirmed on author hands-on review. If the still-open accent color closes on a deep-blue family too, we either pick a complementary hue or move the surface bg to a custom `--color-bg` token so accent and base don't smash together.
+
+---
+
 ### Public repo from day one — no secrets, no unconsented client info
 
 **Rule:** The repo is public from initial push. Practical implications:
