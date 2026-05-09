@@ -1,0 +1,31 @@
+---
+/**
+ * One item in an <IterationCycle> timeline. The `who` prop drives a small
+ * pill next to the title, distinguishing who drives that step:
+ *
+ *   - `you` (default)  — solid slate-800 pill (human-driven).
+ *   - `claude`         — outlined pill (Claude-driven).
+ *   - `together`       — dashed-outline pill (collaborative).
+ *
+ * Single-accent compliant: differentiation is by stroke style, not hue.
+ * If the accent colour closes in DECISIONS.md and we want to tint one of
+ * the variants, do it in the CSS for `.iteration-pill--you` (or whichever)
+ * and document the change as a closed decision.
+ */
+interface Props {
+  who?: 'you' | 'claude' | 'together';
+  title: string;
+}
+
+const { who = 'you', title } = Astro.props;
+---
+
+<li class="iteration-step">
+  <div class="iteration-step__head">
+    <h3 class="iteration-step__title">{title}</h3>
+    <span class={`iteration-pill iteration-pill--${who}`}>{who}</span>
+  </div>
+  <div class="iteration-step__body">
+    <slot />
+  </div>
+</li>

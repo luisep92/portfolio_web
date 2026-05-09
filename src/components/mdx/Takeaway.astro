@@ -1,0 +1,26 @@
+---
+/**
+ * Pull-quote-style block for the article's strongest single takeaways.
+ * Use sparingly — at most one TL;DR up top and 1-2 mid-piece. If every
+ * section gets one, the visual signal flattens.
+ *
+ * `label` is the kicker shown above the body (mono, uppercase). Defaults
+ * to "TL;DR"; pass another short string for mid-piece uses (e.g.
+ * "Key takeaway", "Why this matters").
+ *
+ * Single-accent compliant: slate-only, distinguished from <Callout> by
+ * thicker left rule + larger body type, not by colour.
+ */
+interface Props {
+  label?: string;
+}
+
+const { label = 'TL;DR' } = Astro.props;
+---
+
+<aside class="takeaway">
+  <p class="takeaway__label">{label}</p>
+  <div class="takeaway__body">
+    <slot />
+  </div>
+</aside>

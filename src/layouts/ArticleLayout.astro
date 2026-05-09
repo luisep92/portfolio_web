@@ -31,7 +31,7 @@ const updated = entry.data.updatedAt ? formatter.format(entry.data.updatedAt) : 
     <h1 class="mt-3 text-4xl font-semibold tracking-tight">{entry.data.title}</h1>
     <p class="mt-6 text-lg leading-relaxed text-slate-300">{entry.data.description}</p>
 
-    <article class="mt-12 leading-relaxed text-slate-200 [&>p]:mt-6 [&>h2]:mt-12 [&>h2]:text-2xl [&>h2]:font-semibold">
+    <article class="mdx-body mt-16">
       <Content components={mdxComponents} />
     </article>
   </Container>
