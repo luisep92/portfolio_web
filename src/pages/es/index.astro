@@ -1,14 +1,27 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Container from '../../components/ui/Container.astro';
-import { getLocaleFromUrl, t } from '../../i18n/utils';
-
-const locale = getLocaleFromUrl(Astro.url);
 ---
 
 <BaseLayout>
   <Container class="py-24">
-    <h1 class="text-4xl font-semibold tracking-tight">{t(locale, 'site.title')}</h1>
-    <p class="mt-4 text-neutral-400">{t(locale, 'home.placeholder.body')}</p>
+    <p class="text-lg leading-relaxed text-neutral-200">
+      Ingeniero en KEO-Connectivity, contribuyendo al
+      <a
+        href="https://www.eebus.org/"
+        class="text-neutral-100 underline-offset-4 hover:underline"
+        rel="noopener"
+        target="_blank"
+        >protocolo EEBUS</a
+      >
+      — el estándar abierto para la interoperabilidad de dispositivos energéticos. Trabajo principalmente en la API C++ y en la capa de testing que la sostiene.
+    </p>
+    <p class="mt-6 text-lg leading-relaxed text-neutral-200">
+      Fuera del trabajo construyo side projects en el stack que el problema pida. El desarrollo asistido por IA forma parte de cómo trabajo, en mis propios términos — el workflow guiado por contexto que uso hoy es anterior al nombre que se le ha puesto.
+    </p>
+    <p class="mt-12 text-neutral-400">
+      El trabajo destacado y los experimentos en curso viven en
+      <a href="/es/projects" class="text-neutral-100 underline-offset-4 hover:underline">proyectos</a>.
+    </p>
   </Container>
 </BaseLayout>

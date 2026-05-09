@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: scaffolding.** Docs harness in place. **Steps 1–4 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; `pnpm build` clean. Content collections defined for `articles` and `projects`. i18n plumbing + `<LocaleToggle />` wired through `BaseLayout` + `Header` + `Footer` + `Container`. Four placeholder pages live (`/`, `/es/`, `/projects`, `/es/projects`) all going through the shared layout. Next: **Step 5** — fill Home, Now, and Contact with their actual EN+ES copy (replace placeholder bodies, build out `/now` and `/contact` pages).
+**Phase: scaffolding.** Docs harness in place. **Steps 1–5 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; `pnpm build` clean. Content collections defined for `articles` and `projects`. i18n plumbing + `<LocaleToggle />` wired through `BaseLayout` + `Header` + `Footer` + `Container`. **Static pages done in both locales**: Home (bio), Now, Contact (real handles), plus index placeholders for Projects and Articles so the nav resolves. 10 pages currently built. Next: **Step 6** — dynamic `[slug]` pages for projects (featured tier) and articles, including the partial-bilingual fallback layout.
 
 ---
 
@@ -58,13 +58,19 @@ Verification:
 - `pnpm astro check` and `pnpm build` clean (0/0/0; 4 pages built).
 - Built HTML spot-check: `/` is `lang="en"` with EN nav, `/es/projects/` is `lang="es"` with ES nav, titles are `Projects — Luis Escolano` / `Proyectos — Luis Escolano`, locale toggle round-trips between mirror pages, and the active-state class flips on the link matching the current path.
 
-### 5. Static pages — pending
-**Goal:** Home, Now, Contact rendered with their actual copy in EN. ES mirrors render with the corresponding Spanish copy from `src/i18n/ui.ts`.
+### 5. Static pages — done
 
-- Home: identity paragraph + featured project block with placeholder for the Aline video.
-- Now: short copy. Pulled from `src/i18n/ui.ts` (or a Markdown file, decide during implementation).
-- Contact: email, LinkedIn, GitHub. Plain text. No form.
-- **Validation:** All three pages live in both locales; toggle moves cleanly between them; no Lorem Ipsum left.
+Home, Now, and Contact filled with real copy in both locales. Page-specific text lives directly in each `.astro` file (the i18n dictionary holds only short reusable labels — `nav.*`, `now.last_updated`, `placeholder.coming_soon`, etc.) so editing copy is one file, no string indirection.
+
+- **Home (`/`, `/es/`)**: two-paragraph bio that opens with KEO-Connectivity + EEBUS, closes with the AI-augmented-on-my-own-terms line; one teaser link to `/projects` for now (the cards proper come in Step 7). The Aline featured-video block is deferred — Luis will record a better video once that project ships.
+- **Now (`/now`, `/es/now`)**: two short paragraphs (day job + side project) plus a "Last updated: 2026-05-09" footer. Date hardcoded; bumping it manually as the page updates.
+- **Contact (`/contact`, `/es/contact`)**: "Best by email." + a three-row link list (Email, GitHub, LinkedIn) using the `link.label — display` format. No form.
+- **Articles index placeholder (`/articles`, `/es/articles`)**: bare `BaseLayout` + heading + `placeholder.coming_soon`, just so the nav link doesn't 404 until Step 7+ wires real content.
+
+Verification:
+
+- `pnpm astro check` and `pnpm build` clean (0/0/0 across 20 files; 10 pages built).
+- Spot-check on the rendered HTML: `/` and `/es/` carry the right bio and locale-correct links, `/contact` exposes the three real handles, both `/now` pages show the right copy + "Last updated" / "Última actualización" footer with `2026-05-09`.
 
 ### 6. Dynamic project and article pages — pending
 **Goal:** `/projects/<slug>`, `/articles/<slug>`, and `/es/...` mirrors are generated correctly with the partial-bilingual fallback behavior described in [ARCHITECTURE.md](ARCHITECTURE.md) → "Article and project i18n strategy".

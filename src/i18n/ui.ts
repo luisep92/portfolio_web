@@ -29,6 +29,7 @@ export const ui = {
     'missing.cta': 'Read the available version',
     'home.placeholder.body': 'Site under construction.',
     'placeholder.coming_soon': 'Coming soon.',
+    'now.last_updated': 'Last updated',
   },
   es: {
     'site.title': 'Luis Escolano',
@@ -45,6 +46,7 @@ export const ui = {
     'missing.cta': 'Leer la versión disponible',
     'home.placeholder.body': 'Sitio en construcción.',
     'placeholder.coming_soon': 'Próximamente.',
+    'now.last_updated': 'Última actualización',
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

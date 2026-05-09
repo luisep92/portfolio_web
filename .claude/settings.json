@@ -24,7 +24,10 @@
       "Bash(git -C /home/luis/Projects/portfolio_web add docs/NEXT_STEPS.md src/pages/index.astro src/components/ src/i18n/ src/pages/es/)",
       "Bash(git -C /home/luis/Projects/portfolio_web add docs/NEXT_STEPS.md)",
       "Bash(git -C /home/luis/Projects/portfolio_web log --oneline -6)",
-      "Bash(git -C /home/luis/Projects/portfolio_web add .claude/settings.json docs/NEXT_STEPS.md src/i18n/ui.ts src/pages/ src/styles/global.css src/components/ src/layouts/)"
+      "Bash(git -C /home/luis/Projects/portfolio_web add .claude/settings.json docs/NEXT_STEPS.md src/i18n/ui.ts src/pages/ src/styles/global.css src/components/ src/layouts/)",
+      "Bash(git -C /home/luis/Projects/portfolio_web log --oneline -7)",
+      "Bash(git -C /home/luis/Projects/portfolio_web add .claude/settings.json docs/NEXT_STEPS.md src/i18n/ui.ts src/pages/)",
+      "Bash(git -C /home/luis/Projects/portfolio_web/ commit -m ' *)"
     ]
   }
 }

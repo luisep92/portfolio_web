@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/ui/Container.astro';
+import { getLocaleFromUrl, t } from '../../i18n/utils';
+
+const locale = getLocaleFromUrl(Astro.url);
+const heading = t(locale, 'nav.now');
+const lastUpdated = '2026-05-09';
+---
+
+<BaseLayout title={`${heading} — ${t(locale, 'site.title')}`}>
+  <Container class="py-24">
+    <h1 class="text-3xl font-semibold tracking-tight">{heading}</h1>
+    <div class="mt-8 space-y-5 text-neutral-200 leading-relaxed">
+      <p>
+        Día a día: trabajando en la API C++ de EEBUS y en la capa de testing en KEO-Connectivity, dentro de la EEBUS Initiative.
+      </p>
+      <p>
+        Aparte: construyendo este sitio como excusa para sacar de privado un backlog de side projects que llevan demasiado tiempo ahí.
+      </p>
+    </div>
+    <p class="mt-12 text-xs uppercase tracking-wide text-neutral-500">
+      {t(locale, 'now.last_updated')}: {lastUpdated}
+    </p>
+  </Container>
+</BaseLayout>
