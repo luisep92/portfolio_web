@@ -52,8 +52,8 @@ portfolio_web/
 │   └── media/
 │       └── projects/                   # videos, posters, screenshots referenced from MDX
 ├── src/
+│   ├── content.config.ts               # Zod schemas for collections (Astro 6: lives at src/, not src/content/)
 │   ├── content/
-│   │   ├── config.ts                   # Zod schemas for collections
 │   │   ├── articles/
 │   │   │   ├── en/
 │   │   │   │   └── <slug>.mdx
@@ -116,7 +116,7 @@ Astro's native i18n config drives routing. Spec:
 
 ## Content collections
 
-Two collections, defined in `src/content/config.ts` with Zod schemas.
+Two collections, defined in `src/content.config.ts` (Astro 6 location — note: file lives at `src/content.config.ts`, not under `src/content/`) with Zod schemas using the `glob` loader from `astro/loaders`. `zod` is imported directly (`import { z } from 'zod'`) — re-exporting `z` from `astro:content` is deprecated in Astro 6.
 
 ### `articles`
 

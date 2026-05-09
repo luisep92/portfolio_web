@@ -5,7 +5,7 @@ description: Use whenever you create or edit content in `src/content/articles/` 
 
 # Content authoring
 
-Operational guide for writing articles and projects in this repo. The *why* behind these conventions is captured in [`DECISIONS.md`](../../../docs/DECISIONS.md); the schemas are enforced in `src/content/config.ts` and documented in [`ARCHITECTURE.md → "Content collections"`](../../../docs/ARCHITECTURE.md).
+Operational guide for writing articles and projects in this repo. The *why* behind these conventions is captured in [`DECISIONS.md`](../../../docs/DECISIONS.md); the schemas are enforced in `src/content.config.ts` and documented in [`ARCHITECTURE.md → "Content collections"`](../../../docs/ARCHITECTURE.md).
 
 If you change anything in this skill, also check whether it conflicts with the schema or the architecture doc and update them in the same commit (per [`docs-governance`](../docs-governance/SKILL.md)).
 
@@ -20,7 +20,7 @@ If you change anything in this skill, also check whether it conflicts with the s
 
 ## Frontmatter
 
-Schemas live in `src/content/config.ts` and are mirrored in [`ARCHITECTURE.md → "Content collections"`](../../../docs/ARCHITECTURE.md). This section is the authoring guide; if a field exists in one and not the other, the schema wins and the docs need a fix.
+Schemas live in `src/content.config.ts` and are mirrored in [`ARCHITECTURE.md → "Content collections"`](../../../docs/ARCHITECTURE.md). This section is the authoring guide; if a field exists in one and not the other, the schema wins and the docs need a fix.
 
 ### Article example
 

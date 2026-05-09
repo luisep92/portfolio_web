@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: scaffolding.** Docs harness in place. **Step 1 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap installed on Node 22, `pnpm build` produces `dist/` cleanly with sitemap. Minimal `src/pages/index.astro` placeholder ("Site under construction") rendering. Next: **Step 2** — define content collection schemas for `articles` and `projects`.
+**Phase: scaffolding.** Docs harness in place. **Steps 1–2 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap installed on Node 22; `pnpm build` produces `dist/` cleanly. Content collections defined in `src/content.config.ts` with Zod schemas for `articles` and `projects`; four placeholder MDX files keep the collections populated until real content lands. Next: **Step 3** — i18n plumbing (`src/i18n/{ui,utils}.ts`, `<LocaleToggle />` in the header).
 
 ---
 
@@ -22,11 +22,16 @@ Notes from execution:
 - Tailwind v4 changes the integration: no `tailwind.config.*` file; theme tokens go under `@theme` in CSS. The `@astrojs/tailwind` integration is deprecated — using `@tailwindcss/vite` plugin instead. ARCHITECTURE.md updated to reflect this.
 - `site:` in `astro.config.mjs` is the `https://example.com` placeholder until the domain is decided ([DECISIONS.md → Open](DECISIONS.md)).
 
-### 2. Define content collection schemas — pending
-**Goal:** `src/content/config.ts` contains Zod schemas for `articles` and `projects` matching the table in [ARCHITECTURE.md](ARCHITECTURE.md) → "Content collections".
+### 2. Define content collection schemas — done
 
-- Create the four content directories (`articles/{en,es}`, `projects/{en,es}`) with a single placeholder `.mdx` per language so Astro picks up the collection.
-- **Validation:** `astro sync` runs without schema errors; types are generated. Placeholder pages can be loaded via `getCollection`.
+`src/content.config.ts` defines `articles` and `projects` collections via the `glob` loader (Astro 6 Content Layer API), with Zod schemas matching the tables in [ARCHITECTURE.md](ARCHITECTURE.md) → "Content collections". Four placeholder `.mdx` files (one per locale per collection) live under `src/content/<type>/{en,es}/` so the collections resolve and types are generated. Each placeholder has `draft: true` and is to be deleted as soon as real content lands.
+
+Notes from execution:
+
+- Astro 6 moved the content config from `src/content/config.ts` to **`src/content.config.ts`** (parallel to `src/content/`, not inside it). Doc references updated.
+- `astro:content` re-exports `z` from zod, but it's deprecated in Astro 6 — use `import { z } from 'zod'` directly. `zod` added as a direct devDependency.
+- Zod 4 deprecates `z.string().url()` in favor of the standalone `z.url()`. Schema uses the new form.
+- `pnpm astro sync` and `pnpm astro check` both clean (0 errors / 0 warnings / 0 hints).
 
 ### 3. i18n plumbing — pending
 **Goal:** Locale toggle visible in the header, working both directions, on every page.
