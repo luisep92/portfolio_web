@@ -62,7 +62,8 @@ Pure rules only (no versioned facts that can drift). For technical facts with ve
 1. **Public repo — no secrets, no unconsented client info.** Anything that touches client work (María, Opositia, future engagements) gets a separate permission gate before it's referenced. Environment variables go in `.env.example` with placeholders, never in committed files. No API keys, no auth tokens, no internal URLs.
 2. **Any new technical claim in CLAUDE.md → rewrite as a pointer.** If a technical rule starts living here, the moment it changes there will be drift. Move the claim to its authoritative doc/skill and leave only the pointer.
 3. **Living docs: every behavior change updates the authoritative doc/skill in the SAME commit.** If the commit changes code/scripts/schema/workflow and doesn't touch docs, something is missing. Concrete rules + checklist + "what goes where" map in the [`docs-governance`](.claude/skills/docs-governance/SKILL.md) skill.
-4. **Memory: only `user` and `feedback` types in this project.** Project facts (decisions, paths, current state) go to versioned docs, never to memory. The `project` and `reference` memory types stay unused here. Detail in [docs/DECISIONS.md → "Memory policy"](docs/DECISIONS.md).
+4. **`main` is protected — work on branches, ship via PR.** Every push to `main` auto-deploys to production. Direct pushes are blocked on GitHub; non-trivial changes go through a feature branch + PR with the e2e check passing. Trivial edits (typos, copy, `Last updated`) can land on `main` directly. Detail in [docs/DECISIONS.md → "Git workflow"](docs/DECISIONS.md).
+5. **Memory: only `user` and `feedback` types in this project.** Project facts (decisions, paths, current state) go to versioned docs, never to memory. The `project` and `reference` memory types stay unused here. Detail in [docs/DECISIONS.md → "Memory policy"](docs/DECISIONS.md).
 
 ---
 

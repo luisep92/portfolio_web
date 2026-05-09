@@ -113,6 +113,14 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 
 ---
 
+### Git workflow: branch + PR for non-trivial changes; `main` is protected
+
+**Rule:** `main` is the production branch — every push to it auto-deploys to `https://www.luisep.dev` via Vercel. Anything beyond a one-liner (typo, copy tweak, `Last updated` bump on `/now`) goes through a feature branch and a pull request. `main` is protected on GitHub: PRs are required, the e2e workflow must pass before merging, and direct pushes are blocked. PR previews from Vercel are the validation surface — open the preview URL, check the change in a real browser, then merge.
+
+**Why:** Auto-deploy on push is fast feedback but only safe with guardrails. The build itself catches type errors and missing imports; the e2e suite catches behaviour regressions; the preview URL catches the things tests don't (visual regressions, copy issues, broken anchors). Stacking those three gates keeps `main` green by construction. Pushing directly to `main` for trivial edits is fine because the cost of a typo is a 30-second revert, but for anything structural the preview URL is the safety net that justifies skipping a real staging environment. Branch protection makes the rule enforceable instead of self-policing — a private repo plan would have required paying for it; the public repo gets it for free.
+
+---
+
 ### No comments, no newsletter, no contact form
 
 **Rule:** The Contact page is plain text: email + LinkedIn + GitHub. There is no contact form, no comments section under articles, no newsletter signup. The site does not collect any user input.
