@@ -195,15 +195,20 @@ Three layers, in dependency order: **content** first (the MDX + the diagram comp
 
 ## 6. Anti-patterns — what not to do
 
-**Approve without reading.** Claude suggests a change, you say "yes" without understanding it. This is the #1 source of problems. If you don't understand the code, don't approve it. Take thirty seconds to read what Claude proposes. Ask *"why this approach?"* if something looks off. Redirect before it generates code, not after.
+### Approve without reading
+Claude suggests a change, you say "yes" without understanding it. This is the #1 source of problems. If you don't understand the code, don't approve it. Take thirty seconds to read what Claude proposes. Ask *"why this approach?"* if something looks off. Redirect before it generates code, not after.
 
-**Let Claude decide architecture.** Claude suggests restructuring three modules to be "cleaner". You approve because it sounds good. Now twelve files have changed and you've introduced a pattern nobody else on the team — or your future self — knows. Architecture decisions are human decisions. Claude can propose, you evaluate, the decision goes in `DECISIONS.md`. Claude implements what was decided, not what it prefers.
+### Let Claude decide architecture
+Claude suggests restructuring three modules to be "cleaner". You approve because it sounds good. Now twelve files have changed and you've introduced a pattern nobody else on the team — or your future self — knows. Architecture decisions are human decisions. Claude can propose, you evaluate, the decision goes in `DECISIONS.md`. Claude implements what was decided, not what it prefers.
 
-**Marathon sessions without commits.** Two hours with Claude, 1500 lines generated, zero commits. Now you have to review everything at once and figure out what goes where. Fatigue leads to sloppy commits. Every ten to twenty minutes, stop and commit what's done. Small diffs, clear messages, reviewable units. If something goes wrong, you roll back one commit instead of two hours of work.
+### Marathon sessions without commits
+Two hours with Claude, 1500 lines generated, zero commits. Now you have to review everything at once and figure out what goes where. Fatigue leads to sloppy commits. Every ten to twenty minutes, stop and commit what's done. Small diffs, clear messages, reviewable units. If something goes wrong, you roll back one commit instead of two hours of work.
 
-**Copy sensitive files into the workspace.** Copying a production `.env`, database dump, or certificate into the working directory where Claude operates. Claude reads it, processes it, and that content travels through external APIs. The workspace only contains mock values, example configs, and code. No real credentials, no production data, no certificates. Ever.
+### Copy sensitive files into the workspace
+Copying a production `.env`, database dump, or certificate into the working directory where Claude operates. Claude reads it, processes it, and that content travels through external APIs. The workspace only contains mock values, example configs, and code. No real credentials, no production data, no certificates. Ever.
 
-**"It compiles, ship it."** Code compiles ≠ code works. Especially with generated code, where the structure may be correct but the logic subtly wrong. Run the actual scenario. Test the edge cases. If it's a UI change, look at it. If it's an API, call it. Compilation is necessary but not sufficient.
+### "It compiles, ship it"
+Code compiles ≠ code works. Especially with generated code, where the structure may be correct but the logic subtly wrong. Run the actual scenario. Test the edge cases. If it's a UI change, look at it. If it's an API, call it. Compilation is necessary but not sufficient.
 
 ## 7. Workspace and environment hygiene
 
@@ -222,17 +227,23 @@ Three layers, in dependency order: **content** first (the MDX + the diagram comp
 
 ## 8. Pro tips — things I learned the hard way
 
-**Use feature branches, even locally.** Before starting a new task, create a branch. Even if it never leaves your machine. Claude Code can generate a lot of code very fast — if something goes sideways, a `git checkout main` gets you back to a clean state in one second. Without a branch, you're untangling a diff. With a branch, you delete it and start fresh. It also makes it trivial to separate work into clean, reviewable changesets.
+### Use feature branches, even locally
+Before starting a new task, create a branch. Even if it never leaves your machine. Claude Code can generate a lot of code very fast — if something goes sideways, a `git checkout main` gets you back to a clean state in one second. Without a branch, you're untangling a diff. With a branch, you delete it and start fresh. It also makes it trivial to separate work into clean, reviewable changesets.
 
-**Always end your messages with open questions.** This is one of the highest-value habits you can build. After every Claude response, add a coletilla: *"How does this look to you? Would you do it differently? Is there a simpler or more elegant way? Am I missing something?"* Claude won't volunteer criticism of its own output unless you ask. These questions consistently surface better alternatives, edge cases you hadn't considered, and simpler approaches. It costs you five seconds. It saves you thirty minutes of rework.
+### Always end your messages with open questions
+This is one of the highest-value habits you can build. After every Claude response, add a coletilla: *"How does this look to you? Would you do it differently? Is there a simpler or more elegant way? Am I missing something?"* Claude won't volunteer criticism of its own output unless you ask. These questions consistently surface better alternatives, edge cases you hadn't considered, and simpler approaches. It costs you five seconds. It saves you thirty minutes of rework.
 
-**Never start coding if you're not 100% clear on what you're building.** If the task is ambiguous, if the requirements are fuzzy, if you're not sure how a module should behave — stop. Ask questions. Ask Claude to explain the approach. Ask it to list the edge cases. Ask it to describe what the code will do *before* writing it. The cheapest code to fix is code that was never written wrong. Starting to code with unclear requirements is the fastest way to produce 200 lines you'll throw away.
+### Never start coding if you're not 100% clear on what you're building
+If the task is ambiguous, if the requirements are fuzzy, if you're not sure how a module should behave — stop. Ask questions. Ask Claude to explain the approach. Ask it to list the edge cases. Ask it to describe what the code will do *before* writing it. The cheapest code to fix is code that was never written wrong. Starting to code with unclear requirements is the fastest way to produce 200 lines you'll throw away.
 
-**Ask Claude to generate documentation — it's shockingly good at it.** Claude can produce architecture diagrams, decision logs, module overviews, and onboarding documents that are genuinely pleasant to read. Don't limit it to code. When you finish a feature, ask: *"Generate a document explaining the architecture of what we just built, with diagrams."* You'll get documentation that would take you hours to write manually — and it's based on the code Claude just saw, so it's accurate. Use this. Your future self will thank you.
+### Ask Claude to generate documentation — it's shockingly good at it
+Claude can produce architecture diagrams, decision logs, module overviews, and onboarding documents that are genuinely pleasant to read. Don't limit it to code. When you finish a feature, ask: *"Generate a document explaining the architecture of what we just built, with diagrams."* You'll get documentation that would take you hours to write manually — and it's based on the code Claude just saw, so it's accurate. Use this. Your future self will thank you.
 
-**Subagents — the reward for good planning.** When the plan is well-defined and the tasks are clearly independent, Claude Code can launch subagents that work on separate parts in parallel. For example: one subagent writes the model, another writes the tests, another updates the documentation. This can dramatically speed up a session — but it only works if the plan is precise and modular. If the task definition is vague or the boundaries between pieces are unclear, the subagents will produce code that overlaps or contradicts each other. Plan well, and you unlock parallelism. Plan poorly, and you multiply the mess.
+### Subagents — the reward for good planning
+When the plan is well-defined and the tasks are clearly independent, Claude Code can launch subagents that work on separate parts in parallel. For example: one subagent writes the model, another writes the tests, another updates the documentation. This can dramatically speed up a session — but it only works if the plan is precise and modular. If the task definition is vague or the boundaries between pieces are unclear, the subagents will produce code that overlaps or contradicts each other. Plan well, and you unlock parallelism. Plan poorly, and you multiply the mess.
 
-**Claude Code learns how you work.** Claude Code maintains a memory file about you — your preferences, your patterns, the way you like things structured. The more sessions you do, the better it adapts. Session ten feels noticeably different from session one: less correcting, less explaining, more flow. Another reason to invest in good context files and clear communication from the start — you're not just solving today's task, you're training a working dynamic that compounds over time.
+### Claude Code learns how you work
+Claude Code maintains a memory file about you — your preferences, your patterns, the way you like things structured. The more sessions you do, the better it adapts. Session ten feels noticeably different from session one: less correcting, less explaining, more flow. Another reason to invest in good context files and clear communication from the start — you're not just solving today's task, you're training a working dynamic that compounds over time.
 
 ## Quick reference
 
