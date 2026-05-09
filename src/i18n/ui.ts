@@ -28,6 +28,7 @@ export const ui = {
       'This piece is currently only available in the other language. You can read it there.',
     'missing.cta': 'Read the available version',
     'home.placeholder.body': 'Site under construction.',
+    'placeholder.coming_soon': 'Coming soon.',
   },
   es: {
     'site.title': 'Luis Escolano',
@@ -43,6 +44,7 @@ export const ui = {
       'Esta entrada solo está disponible en el otro idioma por ahora. Puedes leerla allí.',
     'missing.cta': 'Leer la versión disponible',
     'home.placeholder.body': 'Sitio en construcción.',
+    'placeholder.coming_soon': 'Próximamente.',
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

@@ -1,6 +1,24 @@
 @import "tailwindcss";
 
 /*
- * Tailwind v4: theme tokens live here under @theme when we define them.
- * Custom CSS layers (base, components, utilities) go below.
+ * Tailwind v4: theme tokens go under @theme when we define them.
+ * Custom tokens (typography, accent color) stay open until DECISIONS.md
+ * closes the corresponding entries.
  */
+
+@layer base {
+  html {
+    background-color: var(--color-neutral-950);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-neutral-100);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}

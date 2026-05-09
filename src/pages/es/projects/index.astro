@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Container from '../../../components/ui/Container.astro';
+import { getLocaleFromUrl, t } from '../../../i18n/utils';
+
+const locale = getLocaleFromUrl(Astro.url);
+const heading = t(locale, 'nav.projects');
+---
+
+<BaseLayout title={`${heading} — ${t(locale, 'site.title')}`}>
+  <Container class="py-24">
+    <h1 class="text-4xl font-semibold tracking-tight">{heading}</h1>
+    <p class="mt-4 text-neutral-400">{t(locale, 'placeholder.coming_soon')}</p>
+  </Container>
+</BaseLayout>

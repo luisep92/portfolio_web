@@ -1,0 +1,47 @@
+---
+import Container from '../ui/Container.astro';
+import LocaleToggle from './LocaleToggle.astro';
+import { getLocaleFromUrl, localizedPath, t } from '../../i18n/utils';
+
+const locale = getLocaleFromUrl(Astro.url);
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { key: 'nav.projects' as const, basePath: '/projects' },
+  { key: 'nav.articles' as const, basePath: '/articles' },
+  { key: 'nav.now' as const, basePath: '/now' },
+  { key: 'nav.contact' as const, basePath: '/contact' },
+];
+
+function isActive(basePath: string): boolean {
+  const localizedBase = localizedPath(basePath, locale);
+  return currentPath === localizedBase || currentPath.startsWith(localizedBase + '/');
+}
+---
+
+<header class="border-b border-neutral-900">
+  <Container class="flex items-center justify-between gap-8 py-6">
+    <a
+      href={localizedPath('/', locale)}
+      class="text-sm font-medium text-neutral-200 hover:text-neutral-100 transition-colors"
+    >
+      {t(locale, 'site.title')}
+    </a>
+    <nav class="flex items-center gap-5 sm:gap-6">
+      {navItems.map((item) => (
+        <a
+          href={localizedPath(item.basePath, locale)}
+          class:list={[
+            'text-sm transition-colors',
+            isActive(item.basePath)
+              ? 'text-neutral-100'
+              : 'text-neutral-400 hover:text-neutral-100',
+          ]}
+        >
+          {t(locale, item.key)}
+        </a>
+      ))}
+      <LocaleToggle />
+    </nav>
+  </Container>
+</header>

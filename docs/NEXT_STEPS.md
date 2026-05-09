@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: scaffolding.** Docs harness in place. **Steps 1–3 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap installed on Node 22; `pnpm build` produces `dist/` cleanly. Content collections defined in `src/content.config.ts` for `articles` and `projects`. i18n plumbing in `src/i18n/` + `<LocaleToggle />` wired into the placeholder home pages (`/` and `/es/`). Next: **Step 4** — `BaseLayout` + `Header` (with the toggle) + `Footer`, replacing the duplicated boilerplate currently in both home pages.
+**Phase: scaffolding.** Docs harness in place. **Steps 1–4 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap on Node 22; `pnpm build` clean. Content collections defined for `articles` and `projects`. i18n plumbing + `<LocaleToggle />` wired through `BaseLayout` + `Header` + `Footer` + `Container`. Four placeholder pages live (`/`, `/es/`, `/projects`, `/es/projects`) all going through the shared layout. Next: **Step 5** — fill Home, Now, and Contact with their actual EN+ES copy (replace placeholder bodies, build out `/now` and `/contact` pages).
 
 ---
 
@@ -45,12 +45,18 @@ Verification (no test runner installed yet):
 - Helper smoke run via `pnpm dlx tsx -e ...` covered 10 path cases (root, prefixed, deeply nested in either locale, and a defensive `/something/es` that must resolve to default `en`). All pass.
 - When a real test runner lands (deferred), this manual run gets replaced by a Vitest spec.
 
-### 4. Base layout, Header, Footer — pending
-**Goal:** A consistent `BaseLayout` wraps every page. Header has navigation (Home / Projects / Articles / Now / Contact) plus the locale toggle. Footer is minimal.
+### 4. Base layout, Header, Footer — done
 
-- `BaseLayout.astro`, `Header.astro`, `Footer.astro`, `Container.astro` primitive.
-- `src/styles/global.css` with Tailwind base and minimal custom rules. Dark base color, body type defaults.
-- **Validation:** Empty placeholder pages (Home + Projects index in EN) render with consistent header/footer; navigation links work; toggle works from every page.
+`src/layouts/BaseLayout.astro` wraps every page (html/head/body, locale-derived `lang`, optional `title` + `description` props, sticky-footer flex). `src/components/layout/Header.astro` renders the site title (linking home), the four secondary nav items (Projects, Articles, Now, Contact, all derived from `nav.*` keys in `src/i18n/ui.ts`) with active-state styling, and the `<LocaleToggle />`. `src/components/layout/Footer.astro` is minimal (©, year, name). `src/components/ui/Container.astro` is the shared max-width / horizontal-padding primitive.
+
+`src/styles/global.css` adds a small base layer: html background pinned to the dark token (avoids white flash), text rendering tuned, sober `:focus-visible` outline. Typography stays at Tailwind defaults until the typography decision closes.
+
+The four placeholder pages (`/`, `/es/`, `/projects`, `/es/projects`) all use `BaseLayout` now — boilerplate from Step 3 collapsed into the layout, no duplication left.
+
+Verification:
+
+- `pnpm astro check` and `pnpm build` clean (0/0/0; 4 pages built).
+- Built HTML spot-check: `/` is `lang="en"` with EN nav, `/es/projects/` is `lang="es"` with ES nav, titles are `Projects — Luis Escolano` / `Proyectos — Luis Escolano`, locale toggle round-trips between mirror pages, and the active-state class flips on the link matching the current path.
 
 ### 5. Static pages — pending
 **Goal:** Home, Now, Contact rendered with their actual copy in EN. ES mirrors render with the corresponding Spanish copy from `src/i18n/ui.ts`.

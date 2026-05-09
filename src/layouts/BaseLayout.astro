@@ -1,0 +1,32 @@
+---
+import '../styles/global.css';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import { getLocaleFromUrl, t } from '../i18n/utils';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const locale = getLocaleFromUrl(Astro.url);
+const { title, description } = Astro.props;
+const finalTitle = title ?? t(locale, 'site.title');
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{finalTitle}</title>
+    {description && <meta name="description" content={description} />}
+  </head>
+  <body class="flex min-h-screen flex-col bg-neutral-950 text-neutral-100 antialiased">
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
