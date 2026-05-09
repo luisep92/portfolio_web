@@ -6,7 +6,7 @@ The living checklist. Header below summarizes the current state; steps are order
 
 ## Current state
 
-**Phase: scaffolding.** Docs harness in place. **Steps 1–2 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap installed on Node 22; `pnpm build` produces `dist/` cleanly. Content collections defined in `src/content.config.ts` with Zod schemas for `articles` and `projects`; four placeholder MDX files keep the collections populated until real content lands. Next: **Step 3** — i18n plumbing (`src/i18n/{ui,utils}.ts`, `<LocaleToggle />` in the header).
+**Phase: scaffolding.** Docs harness in place. **Steps 1–3 complete**: Astro 6.3 + Tailwind 4 + MDX + sitemap installed on Node 22; `pnpm build` produces `dist/` cleanly. Content collections defined in `src/content.config.ts` for `articles` and `projects`. i18n plumbing in `src/i18n/` + `<LocaleToggle />` wired into the placeholder home pages (`/` and `/es/`). Next: **Step 4** — `BaseLayout` + `Header` (with the toggle) + `Footer`, replacing the duplicated boilerplate currently in both home pages.
 
 ---
 
