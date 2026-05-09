@@ -64,6 +64,8 @@ Examples from real projects:
 
 Skills live in a `.claude/skills/` directory and Claude reads the relevant ones when working on a task that matches their description. They capture *learned knowledge specific to this codebase* in a form that doesn't bloat `CLAUDE.md` and doesn't get lost in chat history.
 
+I only started using skills recently — they didn't earn their place until I worked on a project where the stack involved four or five separate tools, each with its own quirks and undocumented errors. Trying to cram all that into one `CLAUDE.md` would have made it unreadable; trying to remember it across sessions would have meant re-debugging the same dead ends. Skills became necessary because the cost of *not* having them was visible in real time. That's the bar — if a repo doesn't reach it, skip skills. If it does, you'll know.
+
 <Callout kind="note">
 **The key discipline:** write the skill *after* you've done the thing, not before. A skill written speculatively is just docs; a skill written after the first painful pass is operational gold.
 </Callout>
