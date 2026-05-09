@@ -1,0 +1,92 @@
+---
+import { getLocaleFromUrl, t } from '../i18n/utils';
+
+interface Props {
+  url: string;
+  title: string;
+}
+
+const { url, title } = Astro.props;
+const locale = getLocaleFromUrl(Astro.url);
+
+const enc = encodeURIComponent;
+const twitterHref = `https://twitter.com/intent/tweet?text=${enc(title)}&url=${enc(url)}`;
+const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`;
+const hnHref = `https://news.ycombinator.com/submitlink?u=${enc(url)}&t=${enc(title)}`;
+
+const heading = t(locale, 'share.heading');
+const copyLabel = t(locale, 'share.copy.label');
+const copiedLabel = t(locale, 'share.copy.success');
+---
+
+<aside class="mt-16 border-t border-slate-800 pt-8" aria-labelledby="share-heading">
+  <p id="share-heading" class="m-0 text-xs font-medium uppercase tracking-wide text-slate-500">
+    {heading}
+  </p>
+  <ul class="m-0 mt-3 flex list-none flex-wrap gap-x-5 gap-y-2 p-0 text-sm">
+    <li>
+      <a
+        href={twitterHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-slate-300 underline decoration-slate-700 underline-offset-4 transition-colors hover:text-slate-100 hover:decoration-current"
+      >
+        Twitter
+      </a>
+    </li>
+    <li>
+      <a
+        href={linkedinHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-slate-300 underline decoration-slate-700 underline-offset-4 transition-colors hover:text-slate-100 hover:decoration-current"
+      >
+        LinkedIn
+      </a>
+    </li>
+    <li>
+      <a
+        href={hnHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-slate-300 underline decoration-slate-700 underline-offset-4 transition-colors hover:text-slate-100 hover:decoration-current"
+      >
+        Hacker News
+      </a>
+    </li>
+    <li>
+      <button
+        type="button"
+        data-share-copy
+        data-url={url}
+        data-label-default={copyLabel}
+        data-label-copied={copiedLabel}
+        class="cursor-pointer border-0 bg-transparent p-0 text-sm text-slate-300 underline decoration-slate-700 underline-offset-4 transition-colors hover:text-slate-100 hover:decoration-current"
+      >
+        {copyLabel}
+      </button>
+    </li>
+  </ul>
+</aside>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-share-copy]');
+  for (const btn of buttons) {
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.url;
+      if (!url) return;
+      const defaultLabel = btn.dataset.labelDefault ?? 'Copy link';
+      const copiedLabel = btn.dataset.labelCopied ?? 'Copied';
+      try {
+        await navigator.clipboard.writeText(url);
+        btn.textContent = copiedLabel;
+      } catch {
+        // Insecure context or no permission. Fall back to selecting the URL.
+        btn.textContent = url;
+      }
+      window.setTimeout(() => {
+        btn.textContent = defaultLabel;
+      }, 2000);
+    });
+  }
+</script>

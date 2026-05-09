@@ -68,6 +68,7 @@ portfolio_web/
 │   │   ├── layout/                     # Header, Footer, LocaleToggle (chrome that wraps content)
 │   │   ├── ui/                         # primitives (Container, future: Link, Heading, Card)
 │   │   ├── mdx/                        # components used inside MDX (VideoEmbed, Callout, Figure)
+│   │   ├── ArticleShareLinks.astro     # share intents (Twitter/LinkedIn/HN) + copy-link, rendered in ArticleLayout footer
 │   │   └── MissingTranslationNotice.astro  # rendered by [slug].astro when only the other-locale version exists
 │   ├── layouts/
 │   │   ├── BaseLayout.astro

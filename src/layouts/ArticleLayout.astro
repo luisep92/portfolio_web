@@ -2,6 +2,7 @@
 import { render, type CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import Container from '../components/ui/Container.astro';
+import ArticleShareLinks from '../components/ArticleShareLinks.astro';
 import { getLocaleFromUrl } from '../i18n/utils';
 import { mdxComponents } from '../components/mdx';
 
@@ -21,6 +22,8 @@ const formatter = new Intl.DateTimeFormat(dateLocale, {
 });
 const published = formatter.format(entry.data.publishedAt);
 const updated = entry.data.updatedAt ? formatter.format(entry.data.updatedAt) : null;
+
+const articleUrl = new URL(Astro.url.pathname, Astro.site!).toString();
 ---
 
 <BaseLayout
@@ -40,5 +43,7 @@ const updated = entry.data.updatedAt ? formatter.format(entry.data.updatedAt) : 
     <article class="mdx-body mt-16">
       <Content components={mdxComponents} />
     </article>
+
+    <ArticleShareLinks url={articleUrl} title={entry.data.title} />
   </Container>
 </BaseLayout>

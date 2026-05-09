@@ -36,6 +36,27 @@ test.describe('articles', () => {
     ).toBeVisible();
   });
 
+  test('detail page renders share links with correct intent URLs and a copy-link button', async ({
+    page,
+  }) => {
+    await page.goto('/articles/practical-workflow-claude-code');
+    const share = page.getByRole('complementary').filter({ has: page.locator('#share-heading') });
+    await expect(share).toBeVisible();
+    await expect(share.getByRole('link', { name: 'Twitter' })).toHaveAttribute(
+      'href',
+      /twitter\.com\/intent\/tweet\?text=.*&url=.*practical-workflow-claude-code/,
+    );
+    await expect(share.getByRole('link', { name: 'LinkedIn' })).toHaveAttribute(
+      'href',
+      /linkedin\.com\/sharing\/share-offsite\/\?url=.*practical-workflow-claude-code/,
+    );
+    await expect(share.getByRole('link', { name: 'Hacker News' })).toHaveAttribute(
+      'href',
+      /news\.ycombinator\.com\/submitlink\?u=.*practical-workflow-claude-code/,
+    );
+    await expect(share.getByRole('button', { name: 'Copy link' })).toBeVisible();
+  });
+
   test('ES route shows the missing-translation notice (article not yet translated)', async ({
     page,
   }) => {

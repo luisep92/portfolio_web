@@ -36,6 +36,9 @@ export const ui = {
     'projects.other_heading': 'Other technical work',
     'projects.empty': 'More featured projects on the way.',
     'articles.empty': 'More articles on the way.',
+    'share.heading': 'Share',
+    'share.copy.label': 'Copy link',
+    'share.copy.success': 'Copied',
   },
   es: {
     'site.title': 'Luis Escolano',
@@ -59,6 +62,9 @@ export const ui = {
     'projects.other_heading': 'Otros trabajos técnicos',
     'projects.empty': 'Más proyectos destacados en camino.',
     'articles.empty': 'Más artículos en camino.',
+    'share.heading': 'Compartir',
+    'share.copy.label': 'Copiar enlace',
+    'share.copy.success': 'Copiado',
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
