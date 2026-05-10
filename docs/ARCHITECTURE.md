@@ -163,6 +163,8 @@ Frontmatter schema:
 | `order` | number | yes | Sort order within the tier on the index. Lower = earlier. |
 | `year` | number | no |  |
 | `role` | string | no | Free-text, e.g. "Solo author", "Backend lead". |
+| `tags` | `string[]` | no | Tech-stack chips rendered on the "Other technical work" timeline (e.g. `["Python", "Django", "Discord.py"]`). Featured-tier rendering currently ignores them. |
+| `highlight` | string | no | Saturated chip rendered before tech-stack chips on the "Other technical work" timeline. Reserved for items with notable external traction or status, e.g. `"10k+ Nexus downloads"`, `"deployed live"`. Featured-tier rendering currently ignores it. |
 | `links` | object | no | `{ repo?, demo?, video?, article? }`, each a URL string. |
 | `coverImage` | string | no |  |
 | `draft` | boolean | no | Defaults false. |
@@ -325,7 +327,11 @@ Static site on Vercel — minimal attack surface. What's configured:
 
 - **Response headers** in [`vercel.json`](../vercel.json):
   - `Content-Security-Policy`: `'self'` for scripts / styles / images / fonts / `connect`; `frame-src` only the YouTube and Vimeo embed origins used by `<VideoEmbed />`; `'unsafe-inline'` for styles only (Astro emits some inline `<style>`); `frame-ancestors 'none'` prevents the site from being iframed; `object-src 'none'`; `base-uri 'self'`; `form-action 'self'`.
-  - `script-src` carries one pinned `'sha256-...'` allowing the inline registration script that `<Analytics />` from `@vercel/analytics/astro` injects. The hash is the content hash of that script — if the package is updated and the script body changes, the browser will block analytics again and the console will report the new expected hash; copy it into `vercel.json` and redeploy.
+  - `script-src` carries two pinned `'sha256-...'` hashes:
+    - One for the inline registration script that `<Analytics />` from `@vercel/analytics/astro` injects.
+    - One for the inline copy-link handler emitted by [`ArticleShareLinks.astro`](../src/components/ArticleShareLinks.astro) — Astro inlines small `<script>` blocks as a build-time optimisation, so the article share button needs its content hash whitelisted too.
+
+    Each hash is the content hash of its specific inline script. If either source changes (an analytics package bump, or an edit to the share-copy handler), the browser will block it again and the console will report the new expected hash; copy it into `vercel.json` and redeploy.
   - `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` denying `camera`, `microphone`, `geolocation`, `payment` (we never use them).
 - HTTPS, HSTS, DDoS at the edge: Vercel defaults — no extra config.
 - No secrets in repo (see [DECISIONS.md → "Public repo from day one"](DECISIONS.md)); real env values in Vercel project settings.

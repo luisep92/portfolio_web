@@ -42,5 +42,10 @@ playwright-report/
 playwright/.cache/
 blob-report/
 
+# Playwright MCP working directory and ad-hoc verification screenshots
+.playwright-mcp/
+projects-*.png
+articles-*.png
+
 # Custom
 .ignore

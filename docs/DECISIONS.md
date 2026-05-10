@@ -46,6 +46,22 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 
 ---
 
+### Project tags for tech-stack chips on the projects timeline
+
+**Rule:** Projects can declare an optional `tags: string[]` array in frontmatter listing the technologies/stack used (e.g. `["C#", "BepInEx", "Silksong"]`). The "Other technical work" timeline on the projects index renders these as small outlined chips between the title row and the summary. Featured-tier rendering currently ignores `tags`; the field stays optional so existing entries keep validating.
+
+**Why:** The "other" timeline is a list of 9+ items each with a 2–3 line summary. Without chips, scanning the stack of any item required parsing the prose. Chips collapse that to a glance — a reader can tell "Python + LLM + Discord.py" before reading the summary, which restores hierarchy a flat wall of summaries had flattened. Featured cards already get the body rendered as a full narrative, so chips there are deferred until they're a clear win.
+
+---
+
+### Project highlight chip for items with external traction
+
+**Rule:** Projects can declare an optional `highlight: string` — a short free-text label (≤30 chars) rendered as a saturated chip *before* the tech-stack chips on the "Other technical work" timeline. Reserved for items with concrete external traction or status, e.g. `"10k+ Nexus downloads"`, `"3.5k+ Nexus downloads"`, `"deployed live"`. Visual: high-contrast slate inversion (`slate-200` fill, `slate-950` text) until the accent color decision lands — at that point the chip inherits the accent.
+
+**Why:** The timeline gave every item the same vertical weight: UnlockAllTools (10k+ users) read at the same level as a 1ºDAM coursework item. The highlight chip restores hierarchy visually — the eye lands on the saturated chip first and clocks "this one shipped to people" without parsing prose. Free-text label (vs. an enum) keeps the field flexible: future items can declare achievements that don't fit a pre-defined taxonomy.
+
+---
+
 ### Dark mode by design, not by toggle
 
 **Rule:** The site is dark. There is no light mode and no theme toggle. The accent color and typography are tuned against a dark background and not expected to work on a light one.
