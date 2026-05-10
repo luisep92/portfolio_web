@@ -29,6 +29,8 @@ export const ui = {
     'missing.body':
       'This piece is currently only available in the other language. You can read it there.',
     'missing.cta': 'Read the available version',
+    'home.heading': 'Luis Escolano',
+    'home.tagline': 'Software engineer.',
     'home.placeholder.body': 'Site under construction.',
     'placeholder.coming_soon': 'Coming soon.',
     'now.last_updated': 'Last updated',
@@ -55,6 +57,8 @@ export const ui = {
     'missing.body':
       'Esta entrada solo está disponible en el otro idioma por ahora. Puedes leerla allí.',
     'missing.cta': 'Leer la versión disponible',
+    'home.heading': 'Luis Escolano',
+    'home.tagline': 'Software engineer.',
     'home.placeholder.body': 'Sitio en construcción.',
     'placeholder.coming_soon': 'Próximamente.',
     'now.last_updated': 'Última actualización',
