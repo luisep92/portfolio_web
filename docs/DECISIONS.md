@@ -46,6 +46,14 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 
 ---
 
+### Project tags for tech-stack chips on the projects timeline
+
+**Rule:** Projects can declare an optional `tags: string[]` array in frontmatter listing the technologies/stack used (e.g. `["C#", "BepInEx", "Silksong"]`). The "Other technical work" timeline on the projects index renders these as small outlined chips between the title row and the summary. Featured-tier rendering currently ignores `tags`; the field stays optional so existing entries keep validating.
+
+**Why:** The "other" timeline is a list of 9+ items each with a 2–3 line summary. Without chips, scanning the stack of any item required parsing the prose. Chips collapse that to a glance — a reader can tell "Python + LLM + Discord.py" before reading the summary, which restores hierarchy a flat wall of summaries had flattened. Featured cards already get the body rendered as a full narrative, so chips there are deferred until they're a clear win.
+
+---
+
 ### Dark mode by design, not by toggle
 
 **Rule:** The site is dark. There is no light mode and no theme toggle. The accent color and typography are tuned against a dark background and not expected to work on a light one.

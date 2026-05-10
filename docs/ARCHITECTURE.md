@@ -163,6 +163,7 @@ Frontmatter schema:
 | `order` | number | yes | Sort order within the tier on the index. Lower = earlier. |
 | `year` | number | no |  |
 | `role` | string | no | Free-text, e.g. "Solo author", "Backend lead". |
+| `tags` | `string[]` | no | Tech-stack chips rendered on the "Other technical work" timeline (e.g. `["Python", "Django", "Discord.py"]`). Featured-tier rendering currently ignores them. |
 | `links` | object | no | `{ repo?, demo?, video?, article? }`, each a URL string. |
 | `coverImage` | string | no |  |
 | `draft` | boolean | no | Defaults false. |
