@@ -5,7 +5,7 @@ import { getLocaleFromUrl, t } from '../../i18n/utils';
 
 const locale = getLocaleFromUrl(Astro.url);
 const heading = t(locale, 'nav.now');
-const lastUpdated = '2026-05-09';
+const lastUpdated = '2026-05-10';
 ---
 
 <BaseLayout title={`${heading} — ${t(locale, 'site.title')}`}>
@@ -16,7 +16,10 @@ const lastUpdated = '2026-05-09';
         Día a día: trabajando en la API C++ de EEBUS y en la capa de testing en KEO-Connectivity, dentro de la EEBUS Initiative.
       </p>
       <p>
-        Aparte: construyendo este sitio como excusa para sacar de privado un backlog de side projects que llevan demasiado tiempo ahí.
+        Aparte, en activo: moldeando un boss fight de Aline (Beat Saber / Vivify) hasta convertirlo en un harness de mapping para Vivify con asistencia de IA — Unity template, MCP tools, skills de Claude Code. El mapa es el caso de validación; el harness es lo que quiero shippear. Dos clips cortos en <a href="/es/projects/aline-boss-fight" class="text-slate-100 underline-offset-4 hover:underline">/es/projects/aline-boss-fight</a>.
+      </p>
+      <p>
+        También: este sitio, vaciando despacio un backlog de writeups de side projects que llevan demasiado tiempo en privado.
       </p>
     </div>
     <p class="mt-12 text-xs uppercase tracking-wide text-slate-500">

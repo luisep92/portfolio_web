@@ -1,0 +1,32 @@
+---
+title: Aline boss fight (Beat Saber / Vivify)
+summary: What started as a Beat Saber boss fight against Aline (Expedition 33) is turning into a Vivify mapping harness — Unity template, MCP tools and Claude Code skills — that any mapper can pick up to drive their own map with AI assistance, regardless of the source IP. WIP.
+tier: featured
+order: 10
+year: 2026
+role: Solo author
+links:
+  repo: https://github.com/luisep92/my_vivify_template
+---
+
+The trigger was personal: a Beat Saber boss fight against **Aline (Curatress)** from *Expedition 33*, built on [Vivify](https://github.com/Aeroluna/Vivify) — Aeroluna's mod that runs a full Unity 2019.4 scene inside Beat Saber 1.34.2. The deliverable I'm shaping is one layer above: a Vivify mapping harness any mapper can take to drive their own map with AI assistance, regardless of the source IP. The Aline boss fight is the validation case and the visible demo.
+
+The shape of the harness comes from the bottlenecks I hit building Aline. 30+ FModel queries per session to pull source assets → `fmodel-mcp`. Losing iteration speed every time the editor reloaded → port of `unity-mcp` to Unity 2019.4. Both ship as standalone tools, but the harness wires them together with a Unity template, docs, and Claude Code skills covering every layer of the workflow — materials, animations, environment, beatmap editing — so a new mapper isn't starting from a blank scene with an LLM that doesn't know the stack.
+
+State today: work in progress. The harness is taking shape inside the Aline repo; the public artifacts (MCP servers, skills, Unity template) get separated and hardened as they stabilise. The repo is public; the Aline map is not yet released. Two short clips below — the first integrated ability and the animation playground I'm iterating on.
+
+<VideoEmbed
+  src="https://youtu.be/3nEch2zoHHY"
+  caption="First integrated ability — full pipeline: prefab, animation, event timing on the map."
+  wide
+/>
+
+<VideoEmbed
+  src="https://youtu.be/XEcCdVtlG4g"
+  caption="Animation playground — scene used to validate the .psa → Blender → FBX → Unity Animator → Vivify pipeline before wiring it into the map."
+  wide
+/>
+
+<Callout kind="aside">
+  Repo is public and under active development — github.com/luisep92/my_vivify_template. Aline map not yet released; harness still consolidating.
+</Callout>

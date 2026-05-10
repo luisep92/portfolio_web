@@ -15,9 +15,15 @@ interface Props {
   poster?: string;
   alt?: string;
   caption?: string;
+  /**
+   * Break out of the article container width on `lg+` viewports so YouTube
+   * serves higher quality by default (the player picks quality based on the
+   * iframe size it sees). No effect on mobile/tablet.
+   */
+  wide?: boolean;
 }
 
-const { src, poster, alt, caption } = Astro.props;
+const { src, poster, alt, caption, wide = false } = Astro.props;
 
 const isYouTube = /youtube\.com|youtu\.be/.test(src);
 const isVimeo = /vimeo\.com/.test(src);
@@ -25,7 +31,12 @@ const isExternal = isYouTube || isVimeo;
 
 function youTubeEmbedUrl(url: string): string {
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]+)/);
-  return match ? `https://www.youtube-nocookie.com/embed/${match[1]}` : url;
+  if (!match) return url;
+  // hd=1 and vq=hd720 are legacy/undocumented hints; YouTube ignores them
+  // when it wants to but respects them often enough on youtube-nocookie that
+  // it's worth passing them. modestbranding + rel=0 are still official.
+  const params = 'rel=0&modestbranding=1&hd=1&vq=hd720';
+  return `https://www.youtube-nocookie.com/embed/${match[1]}?${params}`;
 }
 
 function vimeoEmbedUrl(url: string): string {
@@ -37,7 +48,7 @@ const embedUrl = isYouTube ? youTubeEmbedUrl(src) : isVimeo ? vimeoEmbedUrl(src)
 const titleText = alt ?? caption ?? 'Embedded video';
 ---
 
-<figure class="my-8">
+<figure class:list={['my-8', wide && 'lg:-mx-24 xl:-mx-40']}>
   {
     isExternal ? (
       <div class="aspect-video w-full overflow-hidden rounded">
