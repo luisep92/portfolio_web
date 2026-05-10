@@ -54,6 +54,14 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 
 ---
 
+### Project highlight chip for items with external traction
+
+**Rule:** Projects can declare an optional `highlight: string` — a short free-text label (≤30 chars) rendered as a saturated chip *before* the tech-stack chips on the "Other technical work" timeline. Reserved for items with concrete external traction or status, e.g. `"10k+ Nexus downloads"`, `"3.5k+ Nexus downloads"`, `"deployed live"`. Visual: high-contrast slate inversion (`slate-200` fill, `slate-950` text) until the accent color decision lands — at that point the chip inherits the accent.
+
+**Why:** The timeline gave every item the same vertical weight: UnlockAllTools (10k+ users) read at the same level as a 1ºDAM coursework item. The highlight chip restores hierarchy visually — the eye lands on the saturated chip first and clocks "this one shipped to people" without parsing prose. Free-text label (vs. an enum) keeps the field flexible: future items can declare achievements that don't fit a pre-defined taxonomy.
+
+---
+
 ### Dark mode by design, not by toggle
 
 **Rule:** The site is dark. There is no light mode and no theme toggle. The accent color and typography are tuned against a dark background and not expected to work on a light one.

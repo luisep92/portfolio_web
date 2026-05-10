@@ -28,6 +28,7 @@ const projectSchema = z.object({
   year: z.number().optional(),
   role: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  highlight: z.string().optional(),
   links: z
     .object({
       repo: z.url().optional(),

@@ -164,6 +164,7 @@ Frontmatter schema:
 | `year` | number | no |  |
 | `role` | string | no | Free-text, e.g. "Solo author", "Backend lead". |
 | `tags` | `string[]` | no | Tech-stack chips rendered on the "Other technical work" timeline (e.g. `["Python", "Django", "Discord.py"]`). Featured-tier rendering currently ignores them. |
+| `highlight` | string | no | Saturated chip rendered before tech-stack chips on the "Other technical work" timeline. Reserved for items with notable external traction or status, e.g. `"10k+ Nexus downloads"`, `"deployed live"`. Featured-tier rendering currently ignores it. |
 | `links` | object | no | `{ repo?, demo?, video?, article? }`, each a URL string. |
 | `coverImage` | string | no |  |
 | `draft` | boolean | no | Defaults false. |
