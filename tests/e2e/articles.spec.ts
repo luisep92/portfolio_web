@@ -59,15 +59,13 @@ test.describe('articles', () => {
     await expect(topShare.getByRole('button', { name: 'Copy link' })).toBeVisible();
   });
 
-  test('ES route shows the missing-translation notice (article not yet translated)', async ({
+  test('ES route renders the translated article (no missing-translation notice)', async ({
     page,
   }) => {
     await page.goto('/es/articles/practical-workflow-claude-code');
-    await expect(page.getByText(/Aún no disponible en este idioma/)).toBeVisible();
-    const link = page.getByRole('link', { name: /Leer la versión disponible/ });
-    await expect(link).toHaveAttribute(
-      'href',
-      /\/articles\/practical-workflow-claude-code\/?$/,
-    );
+    // After translation, the ES route must render the article directly:
+    // an h1 is visible and the partial-bilingual fallback notice is gone.
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    await expect(page.getByText(/Aún no disponible en este idioma/)).toHaveCount(0);
   });
 });
