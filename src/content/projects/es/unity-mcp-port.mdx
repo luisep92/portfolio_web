@@ -9,4 +9,8 @@ links:
   repo: https://github.com/luisep92/unity_vivify_mcp
 ---
 
-Writeup pendiente. El upstream `CoplayDev/unity-mcp` declara Unity 2021.3+ y depende de C# 8/9, UI Toolkit, y APIs que no existen en 2019.4. El fork mantiene los commits cherry-pickables para poder proponer piezas de vuelta al upstream, pero la working copy targetea el mundo de modding de BS 1.34.2 limpiamente.
+El upstream `CoplayDev/unity-mcp` declara Unity 2021.3+ y depende de C# 8/9, UI Toolkit, y APIs que no existen en 2019.4. El fork mantiene los commits cherry-pickables para poder proponer piezas de vuelta al upstream, pero la working copy targetea el mundo de modding de BS 1.34.2 limpiamente.
+
+Qué significó "minimal" en la práctica: borrar ~21 client configurators, el wizard completo de UI Toolkit, todo `Editor/Tools/{Graphics, Profiler, Vfx, ProBuilder}` porque sus APIs son post-2020, y el transport HTTP (stdio basta para single-agent Claude Code). Luego reescribir ~41 sites de sintaxis C# 8/9 a 7.3 — switch expressions a switch clásicos, sintaxis de range/index a `Substring`/`Skip`, target-typed `new()` a constructores explícitos. La lista exhaustiva está en el README.
+
+Lo más duro fue `execute_code`: el compilador CodeDom de .NET Framework aborta la compilación entera cuando topa con una DLL de metadata corrupta, y VivifyTemplate trae una `Newtonsoft.Json.dll` legacy compilada con Mono. El tool ahora detecta "Metadata file 'X' does not contain valid metadata", droppea esa DLL del set de referencias, y reintenta hasta 8 veces.
