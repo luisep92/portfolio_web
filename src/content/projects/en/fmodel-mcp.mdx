@@ -9,7 +9,7 @@ links:
   repo: https://github.com/luisep92/fmodel-mcp
 ---
 
-The driver was internal: I was making 30+ FModel queries per session for the Aline map and the manual GUI loop was wrecking pace. The MCP exposes the operations Claude actually needs — browse, search, export by class, dump materials — and turns "5 minutes per query" into one tool call.
+The driver was internal: I was making 30+ FModel queries per session for [the Aline boss fight](/projects/aline-boss-fight) and the manual GUI loop was wrecking pace. The MCP exposes the operations Claude actually needs — browse, search, export by class, dump materials — and turns "5 minutes per query" into one tool call.
 
 The architecture choice that paid off was splitting the work in two: a standalone .NET CLI that links CUE4Parse and prints JSON, and a thin Python MCP server that invokes the CLI as a subprocess. CUE4Parse is .NET-only; the Python MCP ecosystem (FastMCP) is far more mature than the .NET one — neither side had to bend to host the other. As a side effect the CLI is useful on its own for ad-hoc scripting.
 
