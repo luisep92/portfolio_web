@@ -9,8 +9,8 @@ links:
   repo: https://github.com/luisep92/fmodel-mcp
 ---
 
-Writeup pendiente. El driver fue interno: hacía 30+ consultas a FModel por sesión para el mapa de Aline, y el loop manual de GUI me destrozaba el ritmo. El MCP expone las operaciones que Claude realmente necesita — browse, search, export por clase, dump de materiales — y convierte los "5 minutos por consulta" en una tool call.
+El driver fue interno: hacía 30+ consultas a FModel por sesión para el mapa de Aline, y el loop manual de GUI me destrozaba el ritmo. El MCP expone las operaciones que Claude realmente necesita — browse, search, export por clase, dump de materiales — y convierte los "5 minutos por consulta" en una tool call.
 
-<Callout kind="aside">
-  El repo es público; una retro completa sobre qué funcionó, qué no, y cómo se asentó la frontera .NET ↔ Python irá aquí cuando lo escriba.
-</Callout>
+La decisión de arquitectura que funcionó fue partir el trabajo en dos: un CLI .NET standalone que linka CUE4Parse y escribe JSON, y un servidor MCP Python fino que invoca al CLI por subprocess. CUE4Parse es .NET-only; el ecosistema Python de MCP (FastMCP) está mucho más maduro que el de .NET — ningún lado tuvo que doblarse para hostear al otro. Como efecto colateral, el CLI es útil por sí solo para scripting ad-hoc.
+
+Lo que haría distinto: shippear `config.json.example` desde el día uno en lugar de meter los paths de mi PC en los defaults de `Config.Load`. Ya está hecho, pero es el tipo de cosa que debería ser obvia antes de hacer público el repo.

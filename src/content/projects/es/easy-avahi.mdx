@@ -1,0 +1,12 @@
+---
+title: EasyAvahi
+summary: 'Pequeña librería Python para descubrimiento y publicación de servicios mDNS, construida para aprender el protocolo a fondo. Una ABC `AvahiInterface` + un facade `AvahiClient` que delega a una de dos estrategias duck-typed (D-Bus al `avahi-daemon` nativo en Linux; la librería `zeroconf` cross-platform). Tests de integración contra un stack mDNS real — sin mocks.'
+tier: other
+order: 80
+year: 2025
+role: Autor único
+links:
+  repo: https://github.com/luisep92/EasyAvahi
+---
+
+Tarjeta tier "other"; el cuerpo no se renderiza. README completo — incluida la sección de arquitectura sobre por qué los dos backends son estrategias duck-typed detrás de un facade en lugar de implementaciones directas de la ABC, más la herramienta standalone `mdns_browse.py` — en github.com/luisep92/EasyAvahi.

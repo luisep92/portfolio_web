@@ -1,0 +1,16 @@
+---
+title: portfolio_web
+summary: 'The site you''re looking at. Astro + Tailwind + MDX, bilingual EN/ES, content collections for projects and articles, deployed on Vercel. Public repo so any visitor can audit the architecture, the decisions log, and the MDX behind every card and article from the source.'
+tier: featured
+order: 40
+year: 2026
+role: Solo author
+links:
+  repo: https://github.com/luisep92/portfolio_web
+---
+
+The build is intentionally documented: `docs/PRODUCT.md` covers audience and structure, `docs/ARCHITECTURE.md` the stack (Astro content collections, MDX, partial-bilingual policy), `docs/DECISIONS.md` the log of why each non-trivial choice was made, `docs/NEXT_STEPS.md` the work queue. Treat them as the part of the codebase that explains the rest.
+
+Two angles worth opening from the source: the partial-bilingual content policy (`src/content.config.ts` + `src/lib/content.ts`) — articles default to one language and only get translated counterparts when justified — and the auto-generated index pages for `/projects/` and `/articles/`, in both locales, from the same MDX backing data without duplicated layout code.
+
+Built with Claude Code as a working partner; the collaboration patterns are captured in `CLAUDE.md` and `.claude/skills/`.

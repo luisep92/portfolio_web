@@ -72,7 +72,7 @@ function detailHref(entry: ProjectEntry): string {
         <h2 class="text-xs font-medium uppercase tracking-wide text-slate-500">
           {t(locale, 'projects.other_heading')}
         </h2>
-        <ul class="mt-6 space-y-3 text-sm">
+        <ul class="mt-6 space-y-1 text-sm">
           {other.map((entry) => {
             const repo = entry.data.links?.repo;
             const article = entry.data.links?.article;
@@ -80,22 +80,29 @@ function detailHref(entry: ProjectEntry): string {
             const externalHref = repo ?? article ?? demo;
             const meta = [entry.data.year, entry.data.role].filter(Boolean).join(' · ');
             return (
-              <li class="leading-relaxed text-slate-400">
-                <span class="text-slate-200">{entry.data.title}</span>
-                {meta && <span class="text-slate-500"> — {meta}</span>}
-                <span> — {entry.data.summary}</span>
-                {externalHref && (
-                  <>
-                    {' '}
-                    <a
-                      href={externalHref}
-                      class="text-slate-300 underline-offset-4 hover:text-slate-100 hover:underline"
-                      rel="noopener"
-                      target="_blank"
-                    >
+              <li>
+                {externalHref ? (
+                  <a
+                    href={externalHref}
+                    class="group -mx-4 block rounded px-4 py-3 leading-relaxed transition-colors hover:bg-slate-900/50"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    <span class="font-medium text-slate-200 group-hover:text-slate-100">
+                      {entry.data.title}
+                    </span>
+                    {meta && <span class="text-slate-500"> — {meta}</span>}
+                    <span class="text-slate-400"> — {entry.data.summary}</span>
+                    <span class="ml-1 inline-block text-slate-500 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-slate-200">
                       ↗
-                    </a>
-                  </>
+                    </span>
+                  </a>
+                ) : (
+                  <p class="-mx-4 px-4 py-3 leading-relaxed">
+                    <span class="font-medium text-slate-200">{entry.data.title}</span>
+                    {meta && <span class="text-slate-500"> — {meta}</span>}
+                    <span class="text-slate-400"> — {entry.data.summary}</span>
+                  </p>
                 )}
               </li>
             );
