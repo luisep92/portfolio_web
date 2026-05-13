@@ -1,0 +1,318 @@
+---
+title: Un workflow práctico para Claude Code
+description: Cómo usar Claude Code de forma productiva y segura. Qué hace él, qué haces tú, y cómo debería verse una sesión.
+publishedAt: 2026-05-09
+tags:
+  - claude-code
+  - ai-augmented-development
+  - workflow
+---
+
+Claude Code puede sacar en pocas horas lo que antes llevaba días. También puede generar 800 líneas que no sabes explicar y enterrarte. Misma herramienta, dos resultados — la diferencia es la disciplina que tú metes. Estas son notas sobre cómo es esa disciplina en la práctica, escritas desde proyectos reales (algunos a punto de lanzar, otros viviendo como repos públicos que documentan cómo aprendí algo).
+
+<Takeaway label="TL;DR">
+- **Archivos de contexto** — cinco archivos markdown en el repo. Cinco minutos por sesión para mantenerlos.
+- **El ciclo** — once pasos cortos. Revisa en cada checkpoint, no te los saltes.
+- **Herramientas antes que prompts** — dale a Claude con qué verificar, no en qué pensar.
+- **Commits atómicos** — cinco a ocho por sesión, cada uno revisable.
+- **El piloto firma el cuaderno de bitácora** — Claude genera, tú eres el responsable.
+</Takeaway>
+
+<Callout kind="aside">
+Notas para ingenieros que usan Claude Code en serio, tanto si lanzas en solitario, en equipo, o en algún punto intermedio. Devs en solitario: leed "tu compañero de equipo" o "el revisor externo" como "tu yo futuro tirando de este repo dentro de seis meses." La misma disciplina, los mismos gates. Nada de esto es ciencia exacta — yo mismo no lo aplico igual en todos mis proyectos. Cada repo recibe la versión que le encaja. Leedlo como punto de partida.
+</Callout>
+
+## La regla de oro
+
+Claude Code es un pair programmer muy rápido — tú eres el driver. Cada línea que llega a code review debe ser comprendida y aprobada por un humano. La velocidad es el superpoder y el riesgo: si no revisas sobre la marcha, acabarás con código que no sabes explicar. Revisa pronto, revisa a menudo.
+
+## 1. Contexto del proyecto — alimenta a Claude, no te repitas
+
+Claude Code no tiene memoria entre sesiones. Si no le das contexto, adivina — y adivina mal. La solución es un pequeño conjunto de archivos markdown en el repo que describen el proyecto, el estado actual, y cómo se hacen las cosas. Los escribes una vez, los actualizas como parte de tu workflow, y Claude los lee al inicio de cada sesión.
+
+| Archivo | Qué contiene | Frecuencia de actualización |
+|---|---|---|
+| `CLAUDE.md` | Stack, convenciones, estructura de módulos, reglas de código, patrones de nombres. El documento "cómo hacemos las cosas aquí". Claude Code lo lee automáticamente. | Cuando cambian las convenciones |
+| `NEXT_STEPS.md` | Estado actual, qué se hizo en la última sesión, qué toca hacer a continuación, problemas conocidos. El documento "dónde estamos". | Cada sesión (al final) |
+| `ARCHITECTURE.md` | Arquitectura de alto nivel, diagramas, límites de módulos, flujo de datos. | Cuando cambia la arquitectura |
+| `DECISIONS.md` | Decisiones arquitectónicas resueltas y abiertas con su contexto, para no re-debatirlas. | Cuando se toman decisiones |
+| `.env.example` | Todas las variables de entorno con valores seguros por defecto. Claude puede montar un entorno de desarrollo funcional sin preguntar. | Cuando cambian las variables de entorno |
+
+Sin archivos de contexto, cada sesión empieza con diez minutos de "aquí está el proyecto, así hacemos las cosas, aquí lo dejamos." Con ellos, Claude lee los archivos y es productivo en segundos. La inversión es cinco minutos de escritura al final de cada sesión.
+
+<Callout kind="note">
+**Mantenerlo compacto.** Un `CLAUDE.md` de 50 páginas que nadie actualiza es peor que no tener contexto — Claude puede seguir instrucciones desactualizadas. Mantén los archivos enfocados, precisos y vigentes. Si una sección no se ha actualizado en meses, bórrala o márcala como potencialmente obsoleta.
+</Callout>
+
+<AppliedHere>
+- [`CLAUDE.md`](https://github.com/luisep92/portfolio_web/blob/main/CLAUDE.md) — el brief para **este mismo repo de portfolio**. Router puro (punteros a docs); cero contenido técnico que pueda derivar.
+- [`docs/DECISIONS.md`](https://github.com/luisep92/portfolio_web/blob/main/docs/DECISIONS.md) — cada decisión arquitectónica cerrada con su *por qué*, más una sección "Open" al final para lo que aún está por decidir.
+- [`docs/NEXT_STEPS.md`](https://github.com/luisep92/portfolio_web/blob/main/docs/NEXT_STEPS.md) — el estado del build, actualizado al final de cada sesión. Este artículo aterrizó como Step 11.
+- [`.env.example`](https://github.com/luisep92/portfolio_web/blob/main/.env.example) — el contrato completo de variables de entorno del sitio. Tres líneas, un comentario. El `.env` real nunca se hace commit.
+</AppliedHere>
+
+### Skills — conocimiento operativo específico del repo
+
+Más allá de los archivos de contexto hay otra capa: los **skills**. Un skill es un archivo markdown que documenta un flujo operativo específico de un repo concreto — escrito *después* de haber completado ese flujo al menos una vez, no antes.
+
+Ejemplos de proyectos reales:
+
+- **"Cómo hacemos commits en este repo"** — formato del mensaje, granularidad, qué se squashea.
+- **"Dónde vive cada pieza de código"** — límites de módulos que no son obvios desde el árbol de directorios.
+- **"Cómo añadir una nueva X"** — una receta para el tipo de cambio más frecuente en ese repo.
+- **"Trampas al trabajar con Y"** — los dead ends y rastrillos sobre los que ya he pisado.
+
+Los skills viven en un directorio `.claude/skills/` y Claude lee los relevantes cuando trabaja en una tarea que encaja con su descripción. Capturan *conocimiento aprendido específico de este codebase* en una forma que no infla `CLAUDE.md` y no se pierde en el historial de chat.
+
+Empecé a usar skills hace poco — no se ganaron su sitio hasta que trabajé en [el boss fight de Aline](/es/projects/aline-boss-fight), donde el stack involucraba cuatro o cinco herramientas separadas, cada una con sus propias particularidades y errores no documentados. Intentar meter todo eso en un solo `CLAUDE.md` lo hubiera hecho ilegible; intentar recordarlo entre sesiones habría significado re-depurar los mismos dead ends. Los skills se volvieron necesarios porque el coste de *no* tenerlos era visible en tiempo real. Ese es el baremo — si un repo no lo alcanza, omite los skills. Si lo alcanza, lo notarás.
+
+<Callout kind="note">
+**La disciplina clave:** escribe el skill *después* de haber hecho la cosa, no antes. Un skill escrito de forma especulativa son solo docs; un skill escrito tras el primer paso doloroso es oro operativo.
+</Callout>
+
+<AppliedHere>
+- [skill `docs-governance`](https://github.com/luisep92/portfolio_web/blob/main/.claude/skills/docs-governance/SKILL.md) — *qué hecho va a qué doc*, checklist pre-commit, qué NO poner en `CLAUDE.md` o en memoria. Escrito tras la tercera vez que tuve que corregir duplicación de docs.
+- [skill `content-authoring`](https://github.com/luisep92/portfolio_web/blob/main/.claude/skills/content-authoring/SKILL.md) — convenciones de slug, frontmatter, componentes MDX, cuándo promover un proyecto de `other` a `featured`. Escrito después de escribir este artículo.
+</AppliedHere>
+
+## 2. El ciclo de iteración — una sesión, paso a paso
+
+Cada sesión con Claude Code debería seguir este ciclo. Algunos pasos los hace Claude, otros tú, otros entre los dos. La disciplina clave: **no te saltes los pasos de revisión**. Claude Code es rápido — peligrosamente rápido. Si lo dejas correr sin checkpoints, acabarás con cientos de líneas de código que no entiendes.
+
+<IterationCycle>
+  <Step who="you" title="Alinear el estado">
+    Abre la sesión asegurándote de que los archivos de contexto están al día. Si `NEXT_STEPS.md` está desactualizado, actualízalo. Si la última sesión introdujo nuevas convenciones, actualiza `CLAUDE.md`. Claude leerá estos archivos; si están mal, empieza mal.
+  </Step>
+  <Step who="together" title="Definir la tarea">
+    Dile a Claude qué quieres conseguir en esta sesión. Sé específico: *"añade el endpoint de cancelar pedido con validación y manejo de errores"*, no *"trabaja en los pedidos"*. Si la tarea es grande, pídele a Claude que la descomponga primero.
+  </Step>
+  <Step who="claude" title="Planificar">
+    Claude propone un enfoque: qué archivos tocar, cómo es la implementación, en qué orden. Para tareas pequeñas (un archivo, una función), esto es implícito. Para cualquier cosa que toque varios módulos, pide un plan explícito.
+  </Step>
+  <Step who="you" title="Revisar el plan">
+    **Aquí es donde se previene la mayoría de errores.** Lee lo que Claude propone. ¿Encaja con la arquitectura? ¿Sigue las convenciones? ¿Está complicando algo innecesariamente? Corrige ahora — no después de 300 líneas de código.
+  </Step>
+  <Step who="claude" title="Código">
+    Claude escribe la implementación. Para tareas grandes, pídele que trabaje por etapas — no dejes que genere todo de un golpe. Los límites de etapa son puntos de revisión naturales.
+  </Step>
+  <Step who="you" title="Revisar el código">
+    Lee el código generado. Entiéndelo. Si no puedes explicar qué hace una función, no puedes hacer commit de ella. Esto no es opcional — es el núcleo del modelo de seguridad. Claude genera rápido; tú validas a fondo.
+  </Step>
+  <Step who="you" title="Testear">
+    Compila y verifica que el código funciona. Ejecuta los tests existentes para comprobar que nada se ha roto. Si tu proyecto toca servicios que son sensibles, costosos, o que no quieres exponer al entorno de un agente de IA — APIs de pago, claves de LLM de pago, módulos internos que no puedes compartir públicamente — usa mocks. Usa un `.env` para mantener las credenciales reales completamente fuera del directorio de trabajo. Claude no necesita acceso real a Stripe para verificar que tu código lo llama correctamente; necesita un stub que responda con la forma correcta.
+
+    El principio: **aísla los bordes peligrosos, no todo el entorno**. Una VM sandbox completa es excesiva para la mayoría de proyectos; una disciplina de servicios mocked y secretos sin trackear es suficiente.
+  </Step>
+  <Step who="you" title="Verificación visual">
+    Si el cambio afecta a la salida o al comportamiento, verifica visualmente. No te fíes de que "compila" signifique "funciona". Ejecuta el escenario real de punta a punta.
+  </Step>
+  <Step who="together" title="Documentar">
+    Pídele a Claude que actualice `NEXT_STEPS.md` con lo que se hizo, las decisiones tomadas, y qué toca después. Revisa la actualización — Claude tiende a ser verboso; recorta hasta lo que importa.
+  </Step>
+  <Step who="you" title="Commit y organizar">
+    Los commits deben ser pequeños, atómicos, uno por concepto. Claude Code avanza muy rápido — si no haces commit con frecuencia, acabarás con un diff enorme imposible de revisar. Organiza los commits para contar una historia: la migración primero, luego el modelo, luego la lógica, luego los tests. Cada commit debe ser una unidad revisable con un mensaje claro.
+  </Step>
+  <Step who="you" title="Push y auto-revisión">
+    Haz push a tu herramienta de code review — GitHub, GitLab, Gerrit, lo que uses. Después abre el changeset (o pull request, o merge request) en la UI web y revisa tu propio código como si fueras el revisor externo. Aunque trabajes en solitario, trátalo como si tu yo futuro fuera a tirar de este PR dentro de seis meses. Contexto diferente detecta cosas diferentes. Aprueba solo cuando estés seguro.
+  </Step>
+</IterationCycle>
+
+<Callout kind="note">
+**Por qué importan tanto los commits atómicos aquí.** Claude Code puede generar cientos de líneas en un minuto. Si los commits se acumulan, obtienes un changeset enorme que nadie — incluido tú — puede revisar bien. Los commits pequeños frecuentes te obligan a entender cada pieza según se produce. También hace el trabajo del revisor externo dramáticamente más fácil: cinco commits enfocados frente a un monolito.
+</Callout>
+
+## 3. Dale a Claude herramientas para verificar, no para adivinar
+
+Uno de los mayores puntos de apalancamiento al trabajar con Claude Code no es escribir mejores prompts — es darle a Claude la capacidad de **comprobar su propio trabajo** en lugar de adivinar.
+
+El modo de fallo por defecto de cualquier agente de IA es producir con confianza algo que parece correcto y no funciona. La solución no es "dile que tenga cuidado". La solución es poner herramientas de verificación reales en sus manos para que pueda ver qué está pasando de verdad.
+
+Las herramientas dependen de lo que estés construyendo. Algunos ejemplos de mis propios proyectos:
+
+- **Frontend / web** → Playwright. Claude puede manejar un navegador real, navegar por flujos, hacer screenshots, leer el DOM. *"¿El formulario se envía correctamente?"* deja de ser una pregunta que respondo manualmente y pasa a ser algo que Claude verifica antes de decirme que ha terminado.
+- **Unity / 3D / shaders** → [Unity MCP](/projects/unity-mcp-port) — concretamente [un fork que porté a Unity 2019.4](/projects/unity-mcp-port) porque el build oficial no soportaba versiones antiguas. Claude puede leer la consola del editor, manipular escenas, hacer screenshots desde la cámara del editor, y verificar la salida visual. Iterar sobre un shader sin salir de la conversación es dramáticamente más rápido que el ciclo manual.
+- **Pipelines de extracción de assets / ingeniería inversa** → [fmodel-mcp](/projects/fmodel-mcp), un wrapper MCP que construí alrededor de FModel tras la cuarta vez que me pillé haciendo el mismo export a mano. Ilustra de forma concreta el principio de *"construye tooling tras la tercera consulta manual"* que viene más abajo.
+- **Backend / scripts** → logs reales, test runners reales, llamadas curl reales contra endpoints reales (o mocked).
+- **Trabajo con datos** → consultas reales contra bases de datos reales (credenciales de solo lectura, con scope acotado).
+
+Estas son las herramientas de verificación que necesitan mis proyectos. Las tuyas serán distintas — elige las que encajen con lo que de otra forma comprobarías a mano.
+
+El patrón: **sea cual sea el paso de verificación manual, encuentra la forma de que Claude lo haga programáticamente y vea el resultado.**
+
+### Detecta los cuellos de botella que merece la pena automatizar
+
+Presta atención a qué comprobaciones sigues haciendo manualmente para Claude. *"¿Se ve bien? ¿Está alineado el botón? ¿Ha pasado el test? ¿Ha fallado el script?"* Cada una de esas es un traspaso que corta el flujo.
+
+Si una verificación es **frecuente y trivial**, es candidata a automatizarse. Montar Playwright una vez cuesta una tarde; hacer comprobaciones visuales manuales para cada cambio de UI cuesta horas cada semana.
+
+Dos principios para mantener esto seguro:
+
+1. **El usuario es siempre el gate final.** La verificación automatizada no reemplaza la revisión humana — elimina las comprobaciones manuales que no necesitan un humano en primer lugar. Tú sigues validando el resultado final antes del commit.
+2. **Acota los permisos de las herramientas.** Credenciales de solo lectura. Bases de datos de test en sandbox. APIs de pago mocked. Las herramientas de verificación deben dejar a Claude *ver* el sistema, no dañarlo.
+
+<Takeaway label="Por qué esto importa más que el prompt engineering">
+Un Claude bien equipado con un buen archivo de contexto supera a un Claude mal equipado con el prompt más cuidadosamente elaborado del mundo. Los prompts comprimen intención en lenguaje; las herramientas dejan a Claude observar la realidad. **La realidad gana.** Invierte más tiempo montando herramientas que escribiendo prompts perfectos — los prompts mejoran solos mientras trabajas; las herramientas se componen sobre cada sesión futura.
+</Takeaway>
+
+## 4. Disciplina con los archivos de contexto
+
+Los archivos de contexto no son documentación para humanos — son instrucciones para Claude. Escríbelos como si estuvieras haciendo el briefing a un compañero nuevo que empieza mañana: qué es el proyecto, cómo trabajamos, dónde lo dejamos, qué está decidido y qué está abierto.
+
+**`CLAUDE.md` — el brief permanente.** Es el archivo más importante. Contiene el stack, las convenciones, la estructura de módulos, las reglas de nombres, y los patrones a seguir. Claude Code lo lee automáticamente al inicio de la sesión. Mantenlo en dos o tres páginas. Si es más largo, Claude puede perderse las partes importantes. Estructúralo con cabeceras claras y bullets cortos — Claude parsea la estructura mejor que la prosa.
+
+**`NEXT_STEPS.md` — el traspaso de sesión.** Actualízalo al final de cada sesión. Tres secciones: qué se hizo (changelog), qué toca hacer (prioridades), y problemas conocidos. Esto es lo que hace que la siguiente sesión arranque en diez segundos en lugar de diez minutos. Trátalo como una nota de traspaso para tu yo futuro — porque es exactamente eso.
+
+<Callout kind="note">
+**La regla de los cinco minutos.** Si actualizar los archivos de contexto lleva más de cinco minutos, estás escribiendo demasiado. Sé conciso. *"Añadido endpoint de cancelar pedido. Necesita validación para el caso edge X."* es mejor que un párrafo explicando la implementación.
+</Callout>
+
+<AppliedHere>
+- [`docs/NEXT_STEPS.md`](https://github.com/luisep92/portfolio_web/blob/main/docs/NEXT_STEPS.md) — el doc de traspaso vivo de este sitio. La cabecera de arriba es el estado actual en un párrafo; debajo, cada paso es "qué se hizo" + "criterios de validación". Podrías arrancar con este repo en frío desde este archivo solo.
+</AppliedHere>
+
+## 5. Estrategia de commits
+
+La disciplina con los commits es a la vez una práctica de seguridad y una práctica de calidad. Claude Code genera código rápido — la estrategia de commits debe estar a la altura, o la calidad de la revisión sufre.
+
+<CommitFlowDiagram />
+
+**No hagas:** dejar que Claude genere durante treinta minutos y luego hacer commit de todo como un único changeset *"implementar feature X"*. El revisor ve 800 líneas, las ojea, las aprueba. Los bugs se cuelan.
+
+**Haz:** tras cada pieza lógica (una función, un módulo, un fix), para y haz commit. Cinco a ocho commits por sesión es lo normal. Cada uno es una unidad revisable con un mensaje claro que describe el *qué* y el *por qué*.
+
+Una buena secuencia de commits cuenta una historia. Los tres commits atómicos con los que saqué *este mismo artículo*:
+
+```
+ca69a9f  Add practical-workflow article + CommitFlowDiagram MDX component
+1f4d9b0  Wire /articles index to list real entries from the collection
+0f4ed54  Add e2e spec for practical-workflow article + close Step 11
+```
+
+Tres capas, en orden de dependencia: **contenido** primero (el MDX + el componente de diagrama), luego **routing** (la página de índice que lo lista), luego **tests** (el spec e2e que verifica que funciona). Cada commit es lo suficientemente pequeño para revisarse con cuidado sin fatiga. Cada uno pasa su propio check en CI de forma aislada. Cada uno seguiría teniendo sentido como PR independiente.
+
+<AppliedHere>
+- [Rango de commits del Step 11](https://github.com/luisep92/portfolio_web/compare/86cb7c9~3...86cb7c9) — los tres commits de arriba como rango de diff; haz clic en cualquier commit para ver su mensaje completo y diff revisable.
+- [Historial completo de git de este sitio](https://github.com/luisep92/portfolio_web/commits/main) — cada paso de construcción de este portfolio ha sido una feature branch + PR con commits atómicos. El historial se lee como el changelog real.
+</AppliedHere>
+
+## 6. Anti-patrones — qué no hacer
+
+### Aprobar sin leer
+Claude sugiere un cambio, dices "sí" sin entenderlo. Esta es la fuente número 1 de problemas. Si no entiendes el código, no lo apruebes. Tómate treinta segundos para leer lo que Claude propone. Pregunta *"¿por qué este enfoque?"* si algo parece raro. Redirige antes de que genere código, no después.
+
+### Dejar que Claude decida la arquitectura
+Claude sugiere reestructurar tres módulos para que sean "más limpios". Lo apruebas porque suena bien. Ahora han cambiado doce archivos y has introducido un patrón que nadie en el equipo — ni tu yo futuro — conoce. Las decisiones de arquitectura son decisiones humanas. Claude puede proponer, tú evalúas, la decisión va a `DECISIONS.md`. Claude implementa lo que se decidió, no lo que prefiere.
+
+### Sesiones maratón sin commits
+Dos horas con Claude, 1500 líneas generadas, cero commits. Ahora tienes que revisarlo todo a la vez y averiguar qué va dónde. La fatiga lleva a commits descuidados. Cada diez o veinte minutos, para y haz commit de lo que está hecho. Diffs pequeños, mensajes claros, unidades revisables. Si algo sale mal, haces rollback de un commit en lugar de dos horas de trabajo.
+
+### Copiar archivos sensibles al workspace
+Copiar un `.env` de producción, un dump de base de datos, o un certificado al directorio de trabajo donde opera Claude. Claude lo lee, lo procesa, y ese contenido viaja por APIs externas. El workspace solo contiene valores de mock, configs de ejemplo, y código. Sin credenciales reales, sin datos de producción, sin certificados. Nunca.
+
+### "Compila, palante"
+El código compila ≠ el código funciona. Especialmente con código generado, donde la estructura puede ser correcta pero la lógica sutilmente incorrecta. Ejecuta el escenario real. Prueba los casos edge. Si es un cambio de UI, míralos. Si es una API, llámala. Que compile es necesario pero no suficiente.
+
+## 7. Higiene del workspace y del entorno
+
+<Callout kind="note">
+**Nunca traigas datos de producción al directorio de trabajo.** Sin `.env` con credenciales reales. Sin dumps de base de datos. Sin certificados. Sin API keys. Si Claude necesita entender una interfaz, dale el header file o la spec de la API — nunca las credenciales para acceder a ella.
+</Callout>
+
+**El workspace debe ser desechable.** Todo lo que hay en el directorio de trabajo puede borrarse y recrearse desde el repo. Si perder el workspace significara perder trabajo importante, algo está mal — ese trabajo ya debería tener commit y estar en el remoto.
+
+**`.env.example` como única fuente de verdad.** Mantén un `.env.example` con cada variable, valores seguros por defecto, y comentarios explicando qué hace cada una. Claude puede montar un entorno funcional solo desde este archivo. El `.env` real nunca se hace commit.
+
+<AppliedHere>
+- [`.env.example`](https://github.com/luisep92/portfolio_web/blob/main/.env.example) — tres líneas. El sitio no tiene variables de entorno requeridas en v1; el archivo lo documenta explícitamente para que un clone fresco no tenga nada que configurar antes de ejecutar `pnpm dev`.
+- [`.gitignore`](https://github.com/luisep92/portfolio_web/blob/main/.gitignore) — `.env` y `.env.*` excluidos excepto `.env.example`. Doble seguro: aunque alguien cree accidentalmente `.env.production`, git se niega a indexarlo.
+</AppliedHere>
+
+## 8. Pro tips — cosas que aprendí por las malas
+
+### Usa feature branches, aunque sea solo en local
+Antes de empezar una tarea nueva, crea una branch. Aunque nunca salga de tu máquina. Claude Code puede generar mucho código muy rápido — si algo sale mal, un `git checkout main` te devuelve a un estado limpio en un segundo. Sin branch, estás desenredando un diff. Con branch, la borras y empiezas de cero. También hace trivial separar el trabajo en changesets limpios y revisables.
+
+### Termina siempre tus mensajes con preguntas abiertas
+Este es uno de los hábitos de mayor valor que puedes cultivar. Después de cada respuesta de Claude, añade una coletilla: *"¿Cómo lo ves? ¿Lo harías de otra forma? ¿Hay una manera más simple o elegante? ¿Me estoy dejando algo?"* Claude no va a criticar su propio output a menos que le preguntes. Estas preguntas sacan consistentemente mejores alternativas, casos edge que no habías considerado, y enfoques más simples. Te cuesta cinco segundos. Te ahorra treinta minutos de rework.
+
+### No empieces a codificar si no tienes claro al 100% qué estás construyendo
+Si la tarea es ambigua, si los requisitos son difusos, si no estás seguro de cómo debería comportarse un módulo — para. Haz preguntas. Pídele a Claude que explique el enfoque. Pídele que liste los casos edge. Pídele que describa qué hará el código *antes* de escribirlo. El código más barato de arreglar es el código que nunca se escribió mal. Empezar a codificar con requisitos poco claros es la forma más rápida de producir 200 líneas que vas a tirar.
+
+### Pregunta todo lo que no entiendas del todo — no hay cajas negras
+Una librería que no has usado, un patrón en el diff, por qué funciona un fix, qué hace un config flag — si está borroso, pregunta. Los LLMs son manuales de referencia de paciencia infinita: no se van a cansar de explicar, dibujar diagramas, comparar alternativas, o señalarte fuentes canónicas. Hasta puedes pedir un resumen de una página para quedártelo, o comparar con lo que dice otro modelo. Dos razones por las que esto importa: **responsabilidad** — si no lo entiendes, no puedes firmarlo (según la regla de oro) — y **efecto compuesto** — lo que aprendes una vez, no tienes que aprenderlo otra vez. Cada sesión te entrena silenciosamente *a ti*, no solo produce código.
+
+### Pídele a Claude que genere documentación — es sorprendentemente bueno en ello
+Claude puede producir diagramas de arquitectura, logs de decisiones, resúmenes de módulos, y documentos de onboarding que son genuinamente agradables de leer. No lo limites al código. Cuando termines una feature, pregunta: *"Genera un documento explicando la arquitectura de lo que acabamos de construir, con diagramas."* Obtendrás documentación que te llevaría horas escribir manualmente — y está basada en el código que Claude acaba de ver, así que es precisa. Úsalo. Tu yo futuro te lo agradecerá.
+
+### Lee tu presupuesto de contexto — compacta con intención
+Claude Code te muestra el porcentaje del context window usado. Préstale atención. Una tarea normal termina en torno al 30% usado; las grandes llegan al 50–60%, y por ahí las respuestas empiezan a perder filo — nada dramático, pero el edge se va. Si una tarea va a superar eso, el problema es el scope, no la herramienta. Planifica el siguiente checkpoint natural, ejecuta `/compact` con un resumen deliberado de dónde estás y qué sigue, y retoma con los docs al día. El baremo al que apuntar: abrir una sesión nueva a mitad de una tarea debería sentirse casi idéntico a compactar. Cuando es así, los archivos de contexto están haciendo su trabajo — cualquier cosa podría retomarse desde un arranque en frío.
+
+### Subagents — la recompensa de una buena planificación
+Cuando el plan está bien definido y las tareas son claramente independientes, Claude Code puede lanzar subagents que trabajan en partes separadas en paralelo. Por ejemplo: un subagent escribe el modelo, otro escribe los tests, otro actualiza la documentación. Esto puede acelerar drásticamente una sesión — pero solo funciona si el plan es preciso y modular. Si la definición de la tarea es vaga o los límites entre piezas no están claros, los subagents producirán código que se solapa o se contradice. Planifica bien y desbloqueas el paralelismo. Planifica mal y multiplicas el desastre.
+
+### Claude Code aprende cómo trabajas
+Claude Code mantiene un archivo de memoria sobre ti — tus preferencias, tus patrones, cómo te gusta tener las cosas estructuradas. Cuantas más sesiones hagas, mejor se adapta. La décima sesión se siente notablemente distinta de la primera: menos correcciones, menos explicaciones, más flujo. Otra razón para invertir en buenos archivos de contexto y comunicación clara desde el principio — no estás solo resolviendo la tarea de hoy, estás entrenando una dinámica de trabajo que se compone con el tiempo.
+
+## Referencia rápida
+
+| Claude Code hace | Tú eres el responsable de |
+|---|---|
+| Escribir y editar código | Revisar cada pieza de código generado |
+| Proponer planes de implementación | Tomar todas las decisiones de arquitectura |
+| Explicar código y sugerir mejoras | Asegurar que los commits son pequeños y atómicos |
+| Refactorizar y reestructurar (cuando se pide) | Compilar y testear contra el stack real |
+| Generar scaffolding de tests | Auto-revisar el changeset antes de pedir aprobación |
+| Actualizar documentación (tú revisas) | Actualizar los archivos de contexto (al final de la sesión) |
+| Leer los archivos de contexto del proyecto | Verificar el comportamiento visualmente, no solo la sintaxis |
+| Opera dentro de la conversación | La responsabilidad permanece con el desarrollador |
+
+<Callout kind="note">
+**Una buena planificación ahorra tokens — literalmente.** Si quemas tu allowance de tokens rápido, el problema casi nunca es la herramienta — es el input. Los prompts vagos producen outputs incorrectos, los outputs incorrectos necesitan correcciones, las correcciones consumen tokens. Un prompt bien estructurado con contexto claro, una tarea definida y restricciones explícitas normalmente lo resuelve bien al primer intento. Invertir dos minutos en un prompt preciso ahorra veinte minutos de ida y vuelta — y los tokens que van con ellos. Si consistentemente llegas a tu límite de tokens, revisa cómo estás haciendo los prompts antes de asumir que necesitas una cuota mayor.
+</Callout>
+
+<Takeaway label="Sobre la responsabilidad">
+Claude Code no sufre las consecuencias de un error. Tú sí. *"Lo generó Claude"* no es una explicación, y desde luego no es una excusa. Si tu nombre está en el commit, es tuyo. Las herramientas de esta guía existen para ayudarte a detectar problemas pronto, no para desplazar la responsabilidad. **Claude es el copiloto. El piloto firma el cuaderno de bitácora.**
+</Takeaway>
+
+## Cosas que no uso (y por qué)
+
+La guía de arriba está moldeada por Claude Code porque es lo que uso. Existen algunos setups relacionados que he mirado y decidido no adoptar — listarlos es más honesto que fingir que lo evalué todo.
+
+### Otros agentes de código
+No sé qué tal aguanta este workflow con Cursor, Aider, el modo agente de GitHub Copilot, o cualquiera de los nuevos agentes que salen cada mes. Me sorprendería que un LLM capaz no pudiera trabajar con el mismo setup de archivos de contexto + ciclo de iteración, pero no lo he probado personalmente. Toma los detalles como lo que son: probado en Claude Code; transferible en espíritu a cualquier cosa que pueda leer un `CLAUDE.md`.
+
+### Setups "empresa de IA" multi-agente
+Existe una corriente donde defines roles — agente CEO, agente desarrollador, agente QA, agente de marketing — y los orquestas como un equipo sintético. Yo no lo hago. Claude (Opus, en mi caso) ya lanza subagents cuando la tarea tiene genuinamente forma paralela; eso cubre lo que obtendría de la capa de orquestación sin el overhead del roleplay. Si la tarea no es paralela, más agentes no la hacen paralela — multiplican la confusión.
+
+### Roleplay prompting
+*"Eres un ingeniero de software senior en..."* — Claude ya es un ingeniero de software senior a efectos de escribir código. Decírselo no añade capacidad; condiciona el output de formas poco útiles (tono más cauteloso, más scaffolding, más preámbulo del tipo *"como ingeniero senior yo..."*). Y es redundante — el agente ya te conoce a través de su memoria de tu feedback (ver [Sección 8 → "Claude Code aprende cómo trabajas"](#claude-code-aprende-como-trabajas)) y las convenciones en `CLAUDE.md`. El repo es el rol.
+
+Los casos donde el roleplay prompting *sí* rinde no son realmente roleplay:
+
+- **Restricciones de formato** — *"Eres un bot de Discord, respuestas de menos de 2000 caracteres, nunca envuelvas el output en bloques de código."* Eso es un schema, no una persona.
+- **Anclaje de estilo para output creativo** — *"Escribe con la voz de un manual técnico de los años 40."* Para código, el agente infiere el estilo de tu repo; para prosa con un ancla tonal fuerte, la instrucción explícita se gana su sitio.
+
+<AppliedHere>
+- [`Bisbot/src/GptWrapper.py`](https://github.com/luisep92/Bisbot/blob/main/src/GptWrapper.py) — un bot de Discord que construí donde el wrapper de GPT monta exactamente ese tipo de prompt de formato-como-persona. El framing de *"eres X"* se gana su sitio porque el output va a un cliente de chat con restricciones duras, no a una code review.
+</AppliedHere>
+
+### Agentes cross-repo que actúan sin supervisión
+Herramientas que ejecutan un agente continuamente sobre tus repositorios y le dejan hacer commit, abrir PRs, o decidir en qué trabajar sin que estés en el bucle. Yo no. Cada repo es su propia sesión, y cada commit pasa por mí antes de aterrizar en `main`. Mi workflow de git (branch + PR + e2e + preview, ver [`docs/DECISIONS.md`](https://github.com/luisep92/portfolio_web/blob/main/docs/DECISIONS.md)) está construido alrededor de eso como restricción dura, no como checkpoint que un agente automatizado podría saltarse plausiblemente.
+
+Esto no es un juicio sobre la gente que usa esos setups — puede que estén resolviendo problemas que yo no tengo. Es una declaración honesta de lo que está en esta guía y lo que no.
+
+## Una nota sobre la sobrecarga de tooling
+
+Pasa algún tiempo en LinkedIn o Twitter y verás una nueva herramienta de desarrollo con IA "imprescindible" cada semana. Agentes Hermes, servidores MCP personalizados, sistemas elaborados de gestión de contexto, orquestaciones multi-agente. Algo es genuinamente útil. La mayoría no lo es, para la mayoría de proyectos.
+
+La respuesta honesta: **la mayoría de repos no necesitan la mayoría de esto.**
+
+Un proyecto secundario pequeño puede estar perfectamente servido con un solo `CLAUDE.md` y nada más. Un codebase grande puede necesitar todo lo que he descrito aquí más cosas que aún no he descubierto. La señal no es *"qué herramientas está usando todo el mundo"* — es *"con qué está luchando específicamente este proyecto, y cuál es el mínimo que lo resuelve"*.
+
+Cuando describí los archivos de contexto, el ciclo de iteración, los skills, las herramientas de verificación — estoy describiendo lo que funciona para *mis* proyectos hoy. Si estás trabajando en algo más pequeño, sáltate la mitad. Si estás trabajando en algo más grande, esto probablemente no es suficiente. Construye lo que tu repo necesita, no más.
+
+<Callout kind="note">
+**La mejor práctica real.** Entiende el sistema, luego decide qué copiar. El cargo-culting de workflows de posts de blog — incluyendo este — no mejora tu repo. Adaptar las partes que resuelven tus problemas reales, sí.
+</Callout>
+
+Este es un documento vivo. Lo actualizo a medida que aprendo más trabajando en proyectos reales con Claude Code. Si algo aquí resulta incorrecto o incompleto, eso es parte del proceso — el workflow que encaja con un proyecto hoy no tiene por qué encajarle dentro de seis meses. Léelo en consecuencia.
