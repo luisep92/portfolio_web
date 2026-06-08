@@ -1,0 +1,49 @@
+---
+/**
+ * Test pyramid for the "Three ways to test C++ from Python" article: Mode 1
+ * (unit) at the wide base, Mode 2 (integration) in the middle, Mode 3 (e2e) at
+ * the narrow apex. Neutral slate tiers; what-each-tests lives in the side labels.
+ */
+---
+
+<figure
+  class="my-10 overflow-x-auto rounded border border-slate-800 bg-slate-900/40 px-4 py-6"
+>
+  <svg
+    viewBox="0 0 760 340"
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="A test pyramid: Mode 1 unit tests at the wide base, Mode 2 integration in the middle, Mode 3 end-to-end at the narrow top. Fewer, slower tests toward the top."
+    class="block w-full min-w-[600px]"
+  >
+    <!-- tiers -->
+    <polygon points="380,45 311,125 449,125" fill="#0f172a" stroke="#334155" stroke-width="1.25" />
+    <polygon points="311,125 449,125 510,195 250,195" fill="#0f172a" stroke="#334155" stroke-width="1.25" />
+    <polygon points="250,195 510,195 570,265 190,265" fill="#0f172a" stroke="#334155" stroke-width="1.25" />
+
+    <!-- tier labels -->
+    <text x="380" y="104" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#e2e8f0">Mode 3 — e2e</text>
+
+    <text x="380" y="157" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#e2e8f0">Mode 2 — integration</text>
+    <text x="380" y="174" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9.5" fill="#94a3b8">mock ↔ real server, over TCP</text>
+
+    <text x="380" y="227" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">Mode 1 — unit</text>
+    <text x="380" y="244" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#94a3b8">bindings · in-process · no network</text>
+
+    <!-- side annotations -->
+    <line x1="437" y1="112" x2="585" y2="86" stroke="#475569" stroke-width="1" />
+    <text x="592" y="82" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">real clients + mock,</text>
+    <text x="592" y="96" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">orchestrated — few</text>
+
+    <line x1="481" y1="161" x2="585" y2="161" stroke="#475569" stroke-width="1" />
+    <text x="592" y="157" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">malformed input,</text>
+    <text x="592" y="171" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">wire contract, robustness</text>
+
+    <line x1="549" y1="240" x2="585" y2="240" stroke="#475569" stroke-width="1" />
+    <text x="592" y="236" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">parsing, framing,</text>
+    <text x="592" y="250" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">logic — many, fast</text>
+
+    <!-- caption -->
+    <text x="380" y="312" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="1" fill="#64748b">PUSH EACH CHECK DOWN TO THE CHEAPEST LEVEL THAT CATCHES THE BUG</text>
+  </svg>
+</figure>

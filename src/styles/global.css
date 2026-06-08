@@ -115,6 +115,12 @@
     padding: 0;
     color: var(--color-slate-200);
   }
+  /* Astro's built-in Shiki sets an inline theme background on the <pre>;
+     override it so highlighted code sits in the same slate card as the rest of
+     the page. Token colours come from Shiki's inline span styles and are kept. */
+  .mdx-body pre.astro-code {
+    background-color: var(--color-slate-900) !important;
+  }
 
   .mdx-body table {
     width: 100%;
@@ -300,6 +306,10 @@
     padding-left: 1.25rem;
   }
 
+  .mdx-body .takeaway__body li + li {
+    margin-top: 0.75rem;
+  }
+
   .mdx-body .takeaway__body strong {
     color: var(--color-slate-100);
   }
@@ -341,7 +351,7 @@
   }
 
   .mdx-body .applied-here__body li {
-    padding-left: 1.25rem;
+    padding-left: 1.75rem;
     position: relative;
   }
 
