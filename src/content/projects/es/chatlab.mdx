@@ -1,0 +1,17 @@
+---
+title: Testeo híbrido C++/Python
+summary: Un chat C++ mínimo (servidor + cliente sobre TCP) expuesto a Python con nanobind, para demostrar tres formas de testear sistemas híbridos C++/Python — bindings in-process, un mock de red en Python y un harness híbrido con orquestador y reportes. C++17, scikit-build-core, pytest.
+tier: other
+order: 10
+year: 2026
+role: Autor único
+tags: ['C++17', 'Python', 'nanobind', 'pytest', 'CMake']
+links:
+  repo: https://github.com/luisep92/cpp_python_testing
+---
+
+Tarjeta tier "other"; el cuerpo no se renderiza. El sustrato es un chat C++ mínimo;
+lo interesante son los tres modos de testeo (bindings directos, mock sobre red,
+harness híbrido) y la tesis de que el RPC casero de test es el anti-patrón. Código y
+README completo: github.com/luisep92/cpp_python_testing. Artículo: añadir la URL en
+`links.article` cuando se publique.
