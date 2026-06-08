@@ -1,0 +1,246 @@
+---
+title: Three ways to test C++ from Python
+description: A minimal, runnable demo of three ways to test a hybrid C++/Python system — direct bindings, a network mock, and a hybrid harness — and the homegrown-RPC anti-pattern they avoid.
+publishedAt: 2026-06-08
+draft: true
+tags:
+  - cpp
+  - python
+  - testing
+  - nanobind
+---
+
+You have a C++ system — a protocol stack, a device API, an engine — and you test it from Python, because Python is where writing tests is fast and pleasant. The interesting question isn't _"how do I call C++ from Python"_; it's _"how do the two halves meet so that the tests actually exercise the real thing?"_
+
+There's a tempting wrong turn here, and a lot of teams take it at least once: you bolt a small test-only control channel onto the C++ process, reimplement just enough of the protocol in Python to drive it, and grow an orchestrator full of bespoke logic to make the two talk. It works — and then it quietly rots. Now the protocol exists _twice_; the two copies drift; a bug present in both passes every test green; and the control channel itself — the thing every test now depends on — is code that nothing tests.
+
+This is a write-up of the opposite approach, built as a small but real demo you can run: **expose the real C++ logic and test it directly, three ways.** The substrate is a toy chat server, but the substrate is not the point — the three testing modes are, and they transfer to any serious hybrid C++/Python system.
+
+<Takeaway label="TL;DR">
+
+- **Mode 1 — bindings direct.** Call the real C++ logic in-process through bindings. No network. Microsecond tests of the same code that ships.
+
+- **Mode 2 — mock over the wire.** A stdlib-only Python client drives the real C++ server over a real socket, and does what the C++ client can't: malformed input, partial frames, spoofed senders.
+
+- **Mode 3 — hybrid.** Real C++ clients _and_ the Python mock against the real server, with a reporting orchestrator on top.
+
+- **The thesis.** A homegrown test-only RPC plus a reimplemented protocol is the anti-pattern — two copies that share bugs, and an untested channel in the trust path of every test. Test the real code instead.
+
+- **Minimal, but real.** It's a toy chat; the pattern scales to production stacks unchanged.
+
+</Takeaway>
+
+<Callout kind="aside">
+
+Notes for engineers building or testing a system where C++ and Python meet. Everything here is a [public, runnable repo](https://github.com/luisep92/cpp_python_testing) — `pip install -e .`, `pytest`, done. It's a demonstration of a pattern, not a framework to adopt. Read it for the shape, not the chat.
+
+</Callout>
+
+## 1. The substrate — a toy chat, real behavior
+
+The demo is a chat: a C++ server and a C++ client, JSON over TCP, one room. It's deliberately small, but it has _real_ behavior — enough to make tests worth writing:
+
+- clients get a provisional nickname on connect (`guest-N`), changeable with `/name`
+- `/who` lists the room
+- the keyword `ping` makes the server announce `pong` to everyone
+- a normal message is broadcast to everyone **except** the sender
+
+Messages are newline-delimited JSON (NDJSON) — one compact object per line:
+
+```json
+{"type":"chat","text":"hello"}
+{"from":"alice","text":"hello","type":"chat"}
+{"from":"server","text":"pong","type":"notice"}
+{"type":"roster","users":["alice","guest-2"]}
+```
+
+That's it. Now swap "chat server" for _your_ C++ subsystem and "messages over TCP" for _your_ protocol. The three modes below don't change.
+
+## 2. The one decision that makes it testable — two strict layers
+
+Before any testing trick, there's an architecture decision that everything else hangs off: split the C++ into **two strict layers**.
+
+- **Layer A — pure.** The protocol and state logic: encode/decode a message, reassemble frames from a byte stream, the room's reaction to a command. _No sockets, no threads._ Just functions and values.
+- **Layer B — the I/O shell.** Sockets, the accept loop, the per-connection threads. It _drives_ Layer A but contains no business logic of its own.
+
+<TwoLayersDiagram />
+
+This split is the whole game. Layer A is what you bind to Python and test in-process; Layer B only exists over a real socket, so you test it that way. If I/O leaks into Layer A — a `recv()` call buried in the room logic — Mode 1 becomes impossible and the rot starts. Keeping the pure layer genuinely pure is the discipline that buys you everything else.
+
+The bindings themselves are [nanobind](https://github.com/wjakob/nanobind) — modern, small, C++17, and strict in a way that's a feature here (more on that at the end). But the binding library is incidental; the layering is what matters.
+
+<AppliedHere>
+
+- [`cpp/include/chat/`](https://github.com/luisep92/cpp_python_testing/tree/main/cpp/include/chat) — `protocol`, `room`, `session` are Layer A (pure); `server`, `client` are Layer B (I/O).
+- [`bindings/chat_bind.cpp`](https://github.com/luisep92/cpp_python_testing/blob/main/bindings/chat_bind.cpp) — the _only_ file that touches nanobind. Everything else is plain C++.
+
+</AppliedHere>
+
+## 3. Three ways to test it
+
+It's the test pyramid you already know — unit at the base, integration in the middle, end-to-end at the top — mapped onto a hybrid system. The _layers_ from the last section are about code (pure vs I/O); the _levels_ here are about tests, and they line up: **Mode 1 is the unit level** (the pure logic, in-process), **Mode 2 the integration level** (the real wire, one client/server pair), **Mode 3 the system / e2e level** (several real processes at once). Push each check down to the cheapest level that can catch the bug.
+
+<TestPyramidDiagram />
+
+### Mode 1 — bindings direct
+
+Import the bound C++ and call it in-process. No socket, no subprocess. This is the cheapest, fastest layer, and it tests the protocol/state logic as **the same object code that ships** — not a Python rewrite of it.
+
+```python
+import chatlab
+
+def test_room_ping_yields_pong():
+    room = chatlab.Room()
+    room.join(1)
+    out = room.handle_message(1, chatlab.Message(type="chat", text="ping"))
+    pongs = [o for o in out
+             if o.message.type == "notice" and o.message.text == "pong"]
+    assert pongs and pongs[0].target == chatlab.Target.All
+```
+
+A network mock _does_ need a second, Python implementation of the framing — that's unavoidable. But instead of pretending it doesn't exist, a Mode-1 test pins it to the C++ encoder **byte-for-byte**, so the two can never silently diverge:
+
+```python
+def test_encode_matches_mock_builder_byte_for_byte():
+    msg = chatlab.Message(type="chat", sender="alice", text="hi")
+    assert chatlab.encode(msg).encode() == chatlab.wire.encode(
+        {"type": "chat", "from": "alice", "text": "hi"})
+```
+
+**Use it for** parsing, framing, business-logic branches, edge cases — anything that doesn't _need_ the network. **Not for** anything about real sockets: accept loops, broadcast fan-out, partial reads, concurrency. Those are only real over a real connection.
+
+### Mode 2 — mock over the wire
+
+A stdlib-only Python `MockClient` drives the **real C++ server** over a real TCP socket, speaking the real protocol. Because it builds frames by hand, it can do what the C++ client deliberately _can't_.
+
+```python
+def test_malformed_json_line_returns_error_frame_not_crash(new_client):
+    a = new_client()
+    a.recv_until_idle()                  # drain the join/roster chatter
+
+    a.send_raw(b"this is not json\n")     # the C++ client could never produce this
+
+    errors = [f for f in a.recv_until_idle() if f.get("type") == "error"]
+    assert errors and errors[0]["code"] == "bad_json"
+    # ...and the server is still serving this connection:
+    a.send_json({"type": "chat", "text": "/who"})
+    assert any(f.get("type") == "notice" for f in a.recv_until_idle())
+```
+
+**Use it for** the wire contract and server robustness — broadcast semantics, malformed and partial input, "does a bad client crash the server?". **Not for** asserting the C++ _client's_ behavior (it isn't in the loop here).
+
+### Mode 3 — hybrid harness
+
+Real C++ clients **and** the Python mock against the real server. The C++ client is exposed to Python as a _device_ with a real interface and a Python `on_message` listener the C++ receive thread calls back into — so the test driver instantiates real client code and observes it through callbacks, never by scraping subprocess stdout. The mock plays observer and injector.
+
+```python
+def test_injector_spoofs_user_and_clients_see_it(bound_device, new_client):
+    alice = bound_device()                       # a REAL C++ client, driven from Python
+    alice.send("/name alice")
+    assert alice.wait_for(lambda m: m.type == "roster" and "alice" in m.users)
+
+    victim = bound_device()
+    injector = new_client()                      # the Python mock as injector
+    injector.send_json({"type": "chat", "text": "/name alice"})   # trust-the-client!
+    injector.send_json({"type": "chat", "text": "I am not really alice"})
+
+    spoofed = victim.wait_for(lambda m: m.type == "chat"
+                              and m.sender == "alice"
+                              and m.text == "I am not really alice")
+    assert spoofed is not None     # the victim sees a message attributed to "alice"
+```
+
+**Use it for** end-to-end behavior with real clients, multi-party scenarios, and fault injection a well-behaved client can't express. **Not for** a first line of defense — it's the slowest, most concurrent layer. Push what you can down to Modes 1 and 2; keep Mode 3 for what only it can show.
+
+<HybridFlowDiagram />
+
+## 4. The mock is a test instrument, not a stub
+
+The most common objection to "just unit-test it" is correct: a unit test isn't enough. A real, conformant client can only do conformant things. But the bugs that bite in production are the _non_-conformant ones — and someone, somewhere, will build a client that sends a malformed frame, a half-written message, or a field that lies.
+
+That's the mock's job. It isn't a placeholder for the real client; it's an instrument that can produce inputs the real client _structurally cannot_: malformed JSON, a frame split mid-object across two writes, a spoofed sender under a trust-the-client identity model. The point of Mode 2 and Mode 3 isn't to re-test the happy path over a socket — it's to test what happens when the input is hostile or broken, which is exactly the surface a unit test can't reach.
+
+There's a second payoff that has nothing to do with malformed input: **isolation**. A mock lets you test against the _contract_ without standing up — or exposing — the real system behind it. In my [Claude Code workflow notes](/articles/practical-workflow-claude-code) I make the same point at the service layer: mock the sensitive, costly, or restricted edges rather than sandboxing the whole world. The same logic applies to a protocol. If one side talks to a protected backend, a guarded device, or anything you don't want reachable from a test environment (or from an AI agent operating in that environment), the mock stands in for it. You can take this all the way and **mock the server itself** — test your client against a faithful Python stand-in, so neither the real server, its address, nor its artifacts are ever in reach. (The demo doesn't ship that, but the byte-for-byte guard from Mode 1 is exactly what would keep such a stand-in honest.)
+
+## 5. The orchestrator is a testing tool
+
+In the hybrid mode there's real logic on the Python side — but it lives in an _orchestrator_, and the orchestrator's job is to coordinate real participants and **report**, not to reimplement the protocol.
+
+The harness connects N real C++ devices, records a timeline from their callbacks, and renders a report: a per-participant table plus a who-received-what delivery matrix. Run the scenario and you get:
+
+```text
+Scenario report — 3 participants, 0.60s, 6 messages sent
+
+participant   sent  recv      chat  notice  roster    join   leave   error
+alice            3    11         1       2       6       2       0       0
+bob              2    10         2       2       5       1       0       0
+carol            1     9         3       2       4       0       0       0
+
+Chat delivery (who received each message):
+       alice  "hi everyone"  ->  bob, carol
+         bob  "hey alice"  ->  alice, carol
+       alice  "ping"  ->  bob, carol
+```
+
+The delivery matrix proves the broadcast-not-to-sender rule at a glance — `alice`'s message reaches `bob` and `carol`, never `alice`. Tests assert on the report object (`report.delivery_of("hi everyone").recipients`); a human reads the rendered version. Either way, the orchestration logic is plain Python driving the _real_ clients over the _real_ protocol. There is no test-only side channel anywhere in it.
+
+<AppliedHere>
+
+- [`src/chatlab/harness.py`](https://github.com/luisep92/cpp_python_testing/blob/main/src/chatlab/harness.py) — the orchestrator and the report.
+- [`examples/run_scenario.py`](https://github.com/luisep92/cpp_python_testing/blob/main/examples/run_scenario.py) — `chatlab-scenario` runs the scenario above and prints the report.
+
+</AppliedHere>
+
+## 6. So why not the homegrown RPC?
+
+Back to the wrong turn from the opening. The bespoke-channel approach is tempting because each individual step is reasonable: _"I just need to poke the C++ process from a test"_ → a tiny control socket. _"I need to read its replies"_ → a little Python parser for them. _"I need to script some scenarios"_ → an orchestrator. Nobody decides to build a second protocol; you arrive at one.
+
+What you end up paying:
+
+- **Two implementations to maintain.** Replicated bugs are the obvious cost, but not the worst one. You now have to keep both copies in sync every time the protocol shifts — every change ripples through both. And when something breaks, you don't know whether the bug is in the real implementation or in the test one. On top of that, the classic failure: both implementations get the same edge case wrong, the test that compares them passes, green and wrong. (That byte-for-byte guard from Mode 1 exists precisely because a second implementation, where it's truly unavoidable, has to be _proven_ faithful — not assumed.)
+- **An untested layer in the trust path of every test.** The control channel is code. It has bugs. And every single test now depends on it being correct, while nothing verifies that it is.
+- **Orchestrator gravity.** Logic that should live in the product migrates into the test harness, because the harness is the only place that can see both sides. The harness grows; the product's own testability doesn't.
+
+The three modes avoid all of it by never introducing a second protocol or a private channel: Mode 1 calls the real code, Modes 2 and 3 speak the real wire. The only second implementation is the mock's frame builder, and it's pinned to the real one byte-for-byte. That's the whole trick.
+
+## 7. It's minimal — here's how it scales
+
+The chat is a toy on purpose; the structure is not. To apply this to a real stack, the mapping is direct:
+
+- **Layer A / Layer B split** → factor your subsystem so the protocol/state logic has no I/O in it. This is the only part that takes real work, and it pays for itself the first time you debug the pure logic without a socket in the way.
+- **Mode 1** → bind that pure core and unit-test it in-process.
+- **Mode 2** → keep a stdlib mock that speaks your real wire format; use it for malformed/edge/adversarial input.
+- **Mode 3** → drive real client instances from Python with callbacks; orchestrate and report.
+
+Honest limits: the demo is one global room, no auth, no TLS, POSIX-only, and it ships no wheels. Mode 3's concurrency is real concurrency, so its tests need the usual flakiness discipline (the repo uses an ephemeral port plus a readiness sentinel instead of `sleep`, and process-group teardown — small things that matter a lot at scale). And the layering only helps if you actually keep the pure layer pure; the moment it isn't, you're back to Mode-2-or-nothing.
+
+## Under the hood: binding a thread that calls back into Python
+
+_Optional — skip this unless you bind C++ threads to Python._ Binding the pure layer is easy. The device in Mode 3 is where it gets real: a C++ object that owns a socket and a background receive thread, and that thread calls a Python callback for every message. Three things have to be right, and all of them live in the binding glue — the C++ core never mentions Python:
+
+1. **Acquire the GIL.** Python's global lock means only one thread runs Python at a time, and you must hold it to touch any Python object. The receive thread was created by C++, so it holds nothing — it has to acquire the GIL before invoking the callback, or it corrupts the interpreter.
+2. **Release it to shut down.** When Python calls `disconnect()`, which _joins_ that thread, Python is holding the GIL. But the thread may be mid-callback, waiting for the GIL. Python waits for the thread; the thread waits for Python. Deadlock. The fix: release the GIL across the join.
+3. **Break the reference cycle the GC can't see.** The Python device holds the C++ client, which holds (in a C++ `std::function`) the Python callback, which — as a bound method — holds the device. A cycle. Python's garbage collector can normally break cycles, but it can't _see_ the edge that lives inside C++, so nothing is ever freed. You break it by hand: clear the callback on disconnect.
+
+None of this is exotic, but it's the part tutorials skip, and it's why nanobind's stricter ownership model is an asset here — it surfaces these issues at the boundary instead of letting them rot into intermittent crashes.
+
+<AppliedHere>
+
+- [`bindings/chat_bind.cpp`](https://github.com/luisep92/cpp_python_testing/blob/main/bindings/chat_bind.cpp) — the GIL acquire/release and the cycle-break, in ~40 lines with comments.
+- [`DECISIONS.md`](https://github.com/luisep92/cpp_python_testing/blob/main/DECISIONS.md) — the rationale for each, written as the decisions were made.
+
+</AppliedHere>
+
+## Try it
+
+```bash
+git clone https://github.com/luisep92/cpp_python_testing && cd cpp_python_testing
+python -m venv .venv && source .venv/bin/activate
+pip install nanobind scikit-build-core ninja pytest pytest-timeout
+pip install --no-build-isolation -Ceditable.rebuild=true -ve .
+
+pytest -q            # all three modes
+chatlab-scenario     # the orchestrator demo -> prints the report above
+```
+
+The repo's README walks each mode with the same examples in more depth. If you've lived the homegrown-RPC version of this, I'd genuinely like to hear how it went — the failure modes are always a little different, and always a little the same.

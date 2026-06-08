@@ -2,6 +2,9 @@ import VideoEmbed from './VideoEmbed.astro';
 import Callout from './Callout.astro';
 import Figure from './Figure.astro';
 import CommitFlowDiagram from './CommitFlowDiagram.astro';
+import TwoLayersDiagram from './TwoLayersDiagram.astro';
+import TestPyramidDiagram from './TestPyramidDiagram.astro';
+import HybridFlowDiagram from './HybridFlowDiagram.astro';
 import IterationCycle from './IterationCycle.astro';
 import Step from './Step.astro';
 import Takeaway from './Takeaway.astro';
@@ -23,6 +26,9 @@ export const mdxComponents = {
   Callout,
   Figure,
   CommitFlowDiagram,
+  TwoLayersDiagram,
+  TestPyramidDiagram,
+  HybridFlowDiagram,
   IterationCycle,
   Step,
   Takeaway,
