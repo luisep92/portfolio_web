@@ -1,0 +1,246 @@
+---
+title: Tres formas de testear C++ desde Python
+description: Una demo mínima y ejecutable de tres formas de testear un sistema híbrido C++/Python — bindings directos, un mock de red y un harness híbrido — y el anti-patrón del RPC casero que evitan.
+publishedAt: 2026-06-08
+draft: true
+tags:
+  - cpp
+  - python
+  - testing
+  - nanobind
+---
+
+Tienes un sistema en C++ — un stack de protocolo, una API de dispositivo, un motor — y lo testeas desde Python, porque Python es donde escribir tests es rápido y agradable. La pregunta interesante no es _"cómo llamo a C++ desde Python"_; es _"cómo encajan las dos mitades para que los tests prueben código real"_.
+
+Aquí hay un desvío tentador, y mucha gente lo toma al menos una vez: le enganchas un canal de control solo-para-tests al proceso C++, reimplementas en Python lo justo del protocolo para manejarlo, y haces crecer un orquestador lleno de lógica a medida para que los dos hablen. Funciona — y luego se pudre poco a poco. Ahora el protocolo existe _dos veces_; las dos copias divergen; un bug presente en ambas pasa todos los tests en verde; y el propio canal de control — eso de lo que ahora dependen todos los tests — es código que nada testea.
+
+Esto es un repaso del enfoque opuesto, construido como una demo pequeña pero real que puedes ejecutar: **expón la lógica C++ real y testéala directamente, de tres formas.** El ejemplo es un chat de juguete, pero el ejemplo no es lo importante — lo son los tres modos de testeo, y se trasladan a cualquier sistema híbrido C++/Python serio.
+
+<Takeaway label="TL;DR">
+
+- **Modo 1 — bindings directos.** Llama a la lógica C++ real en proceso a través de bindings. Sin red. Tests de microsegundos sobre el mismo código que se despliega.
+
+- **Modo 2 — mock sobre la red.** Un cliente Python de solo-stdlib maneja el servidor C++ real por un socket real, y hace lo que el cliente C++ no puede: entrada malformada, frames partidos, remitentes falseados.
+
+- **Modo 3 — híbrido.** Clientes C++ reales _y_ el mock Python contra el servidor real, con un orquestador con reportes por encima.
+
+- **La tesis.** Un RPC casero solo-para-tests más un protocolo reimplementado es el anti-patrón — dos copias que comparten bugs, y un canal sin testear en la ruta de confianza de cada test. Testea el código real.
+
+- **Mínimo, pero real.** Es un chat de juguete; el patrón escala a stacks de producción sin cambios.
+
+</Takeaway>
+
+<Callout kind="aside">
+
+Notas para gente que construye o testea un sistema donde C++ y Python se encuentran. Todo esto es un [repo público y ejecutable](https://github.com/luisep92/cpp_python_testing) — `pip install -e .`, `pytest`, listo. Es la demostración de un patrón, no un framework para adoptar. Léelo por la forma, no por el chat.
+
+</Callout>
+
+## 1. El ejemplo — un chat de juguete, comportamiento real
+
+La demo es un chat: un servidor C++ y un cliente C++, JSON sobre TCP, una sala. Es deliberadamente pequeño, pero tiene comportamiento _real_ — suficiente para que valga la pena escribir tests:
+
+- los clientes reciben un nick provisional al conectar (`guest-N`), cambiable con `/name`
+- `/who` lista la sala
+- la palabra clave `ping` hace que el servidor anuncie `pong` a todos
+- un mensaje normal se difunde a todos **menos** al emisor
+
+Los mensajes son JSON delimitado por saltos de línea (NDJSON) — un objeto compacto por línea:
+
+```json
+{"type":"chat","text":"hello"}
+{"from":"alice","text":"hello","type":"chat"}
+{"from":"server","text":"pong","type":"notice"}
+{"type":"roster","users":["alice","guest-2"]}
+```
+
+Eso es todo. Ahora cambia "servidor de chat" por _tu_ subsistema C++ y "mensajes por TCP" por _tu_ protocolo. Los tres modos de abajo no cambian.
+
+## 2. La decisión que lo hace testeable — dos capas estrictas
+
+Antes de cualquier truco de testing, hay una decisión de arquitectura de la que cuelga todo lo demás: parte el C++ en **dos capas estrictas**.
+
+- **Capa A — pura.** La lógica de protocolo y estado: codificar/decodificar un mensaje, reensamblar frames desde un flujo de bytes, la reacción de la sala a un comando. _Sin sockets, sin hilos._ Solo funciones y valores.
+- **Capa B — el shell de I/O.** Sockets, el bucle de accept, los hilos por conexión. _Maneja_ la Capa A pero no contiene lógica de negocio propia.
+
+<TwoLayersDiagram />
+
+Esta separación lo decide todo. La Capa A es lo que bindeas a Python y testeas en proceso; la Capa B solo existe sobre un socket real, así que la testeas de esa forma. Si la I/O se cuela en la Capa A — una llamada a `recv()` enterrada en la lógica de la sala — el Modo 1 se vuelve imposible y empieza la podredumbre. Mantener la capa pura genuinamente pura es la disciplina que te compra todo lo demás.
+
+Los bindings son [nanobind](https://github.com/wjakob/nanobind) — moderno, pequeño, C++17, y estricto de una forma que aquí es una ventaja (más sobre eso al final). Pero la librería de bindings es lo de menos; lo que importa es la separación en capas.
+
+<AppliedHere>
+
+- [`cpp/include/chat/`](https://github.com/luisep92/cpp_python_testing/tree/main/cpp/include/chat) — `protocol`, `room`, `session` son Capa A (pura); `server`, `client` son Capa B (I/O).
+- [`bindings/chat_bind.cpp`](https://github.com/luisep92/cpp_python_testing/blob/main/bindings/chat_bind.cpp) — el _único_ fichero que toca nanobind. Todo lo demás es C++ plano.
+
+</AppliedHere>
+
+## 3. Tres formas de testearlo
+
+Es la pirámide de tests que ya conoces — unit en la base, integration en medio, end-to-end arriba — mapeada sobre un sistema híbrido. Las _capas_ de la sección anterior son sobre código (pura vs I/O); los _niveles_ de aquí son sobre tests, y encajan: **el Modo 1 es el nivel unit** (la lógica pura, en proceso), **el Modo 2 el nivel integration** (el protocolo real, un par cliente/servidor), **el Modo 3 el nivel system / e2e** (varios procesos reales a la vez). Empuja cada comprobación al nivel más barato que pueda cazar el bug.
+
+<TestPyramidDiagram />
+
+### Modo 1 — bindings directos
+
+Importa el C++ bindeado y llámalo en proceso. Sin socket, sin subproceso. Es la capa más barata y rápida, y testea la lógica de protocolo/estado como **el mismo código objeto que se despliega** — no una reescritura en Python.
+
+```python
+import chatlab
+
+def test_room_ping_yields_pong():
+    room = chatlab.Room()
+    room.join(1)
+    out = room.handle_message(1, chatlab.Message(type="chat", text="ping"))
+    pongs = [o for o in out
+             if o.message.type == "notice" and o.message.text == "pong"]
+    assert pongs and pongs[0].target == chatlab.Target.All
+```
+
+Un mock de red _sí_ necesita una segunda implementación, en Python, del framing — eso es inevitable. Pero en vez de fingir que no existe, un test del Modo 1 la fija al codificador C++ **byte a byte**, de modo que las dos nunca puedan divergir en silencio:
+
+```python
+def test_encode_matches_mock_builder_byte_for_byte():
+    msg = chatlab.Message(type="chat", sender="alice", text="hi")
+    assert chatlab.encode(msg).encode() == chatlab.wire.encode(
+        {"type": "chat", "from": "alice", "text": "hi"})
+```
+
+**Úsalo para** parsing, framing, ramas de lógica de negocio, casos límite — cualquier cosa que no _necesite_ la red. **No para** nada sobre sockets reales: bucles de accept, fan-out de la difusión, lecturas parciales, concurrencia. Eso solo es real sobre una conexión real.
+
+### Modo 2 — mock sobre la red
+
+Un `MockClient` de Python solo-stdlib maneja el **servidor C++ real** por un socket TCP real, hablando el protocolo real. Como construye los frames a mano, puede hacer lo que el cliente C++ deliberadamente _no puede_.
+
+```python
+def test_malformed_json_line_returns_error_frame_not_crash(new_client):
+    a = new_client()
+    a.recv_until_idle()                  # vacía el ruido de join/roster
+
+    a.send_raw(b"this is not json\n")     # el cliente C++ jamás produciría esto
+
+    errors = [f for f in a.recv_until_idle() if f.get("type") == "error"]
+    assert errors and errors[0]["code"] == "bad_json"
+    # ...y el servidor sigue sirviendo esta conexión:
+    a.send_json({"type": "chat", "text": "/who"})
+    assert any(f.get("type") == "notice" for f in a.recv_until_idle())
+```
+
+**Úsalo para** el contrato del protocolo y la robustez del servidor — semántica de la difusión, entrada malformada y parcial, "¿un cliente malo tumba el servidor?". **No para** asertar el comportamiento del _cliente_ C++ (aquí no está en el bucle).
+
+### Modo 3 — harness híbrido
+
+Clientes C++ reales **y** el mock Python contra el servidor real. El cliente C++ se expone a Python como un _dispositivo_ con interfaz de verdad y un listener Python `on_message` al que el hilo de recepción C++ llama de vuelta — así el driver de tests instancia código de cliente real y lo observa por callbacks, nunca raspando el stdout de un subproceso. El mock hace de observador e inyector.
+
+```python
+def test_injector_spoofs_user_and_clients_see_it(bound_device, new_client):
+    alice = bound_device()                       # un cliente C++ REAL, manejado desde Python
+    alice.send("/name alice")
+    assert alice.wait_for(lambda m: m.type == "roster" and "alice" in m.users)
+
+    victim = bound_device()
+    injector = new_client()                      # el mock Python como inyector
+    injector.send_json({"type": "chat", "text": "/name alice"})   # trust-the-client!
+    injector.send_json({"type": "chat", "text": "I am not really alice"})
+
+    spoofed = victim.wait_for(lambda m: m.type == "chat"
+                              and m.sender == "alice"
+                              and m.text == "I am not really alice")
+    assert spoofed is not None     # la víctima ve un mensaje atribuido a "alice"
+```
+
+**Úsalo para** comportamiento end-to-end con clientes reales, escenarios multi-parte e inyección de fallos que un cliente bien educado no puede expresar. **No para** una primera línea de defensa — es la capa más lenta y concurrente. Empuja lo que puedas a los Modos 1 y 2; reserva el Modo 3 para lo que solo él puede mostrar.
+
+<HybridFlowDiagram />
+
+## 4. El mock es un instrumento de testing, no un stub
+
+La objeción más común a "tú testéalo unitario" es correcta: un unit test no basta. Un cliente real y conforme solo puede hacer cosas conformes. Pero los bugs que muerden en producción son los _no_ conformes — y alguien, en algún sitio, construirá un cliente que mande un frame malformado, un mensaje a medias o un campo que miente.
+
+Ese es el trabajo del mock. No es un sustituto del cliente real; es un instrumento que puede producir entradas que el cliente real _estructuralmente no puede_: JSON malformado, un frame partido a mitad de objeto entre dos escrituras, un remitente falseado bajo un modelo de identidad trust-the-client. El objetivo de los Modos 2 y 3 no es re-testear el camino feliz sobre un socket — es testear qué pasa cuando la entrada es hostil o está rota, que es justo la superficie que un unit test no alcanza.
+
+Hay un segundo beneficio que no tiene nada que ver con la entrada malformada: **el aislamiento**. Un mock te deja testear contra el _contrato_ sin levantar — ni exponer — el sistema real que hay detrás. En mis [notas sobre el flujo con Claude Code](/es/articles/practical-workflow-claude-code) hago el mismo planteamiento a nivel de servicio: mockea los bordes sensibles, caros o restringidos en vez de aislarlo todo. La misma lógica aplica a un protocolo. Si un lado habla con un backend protegido, un dispositivo bajo control, o cualquier cosa que no quieres que sea alcanzable desde un entorno de tests (o desde un agente de IA operando en ese entorno), el mock lo suple. Puedes llevarlo hasta el final y **mockear el propio servidor** — testear tu cliente contra un sustituto Python fiel, de modo que ni el servidor real, ni su dirección, ni sus artefactos estén nunca al alcance. (La demo no lo trae, pero el guard byte a byte del Modo 1 es exactamente lo que mantendría honesto a ese sustituto.)
+
+## 5. El orquestador es una herramienta de testing
+
+En el modo híbrido sí hay lógica real en el lado Python — pero vive en un _orquestador_, y el trabajo del orquestador es coordinar a participantes reales y **reportar**, no reimplementar el protocolo.
+
+El harness conecta N dispositivos C++ reales, graba una línea temporal a partir de sus callbacks, y renderiza un reporte: una tabla por participante más una matriz de entrega de quién-recibió-qué. Lanza el escenario y obtienes:
+
+```text
+Scenario report — 3 participants, 0.60s, 6 messages sent
+
+participant   sent  recv      chat  notice  roster    join   leave   error
+alice            3    11         1       2       6       2       0       0
+bob              2    10         2       2       5       1       0       0
+carol            1     9         3       2       4       0       0       0
+
+Chat delivery (who received each message):
+       alice  "hi everyone"  ->  bob, carol
+         bob  "hey alice"  ->  alice, carol
+       alice  "ping"  ->  bob, carol
+```
+
+La matriz de entrega demuestra de un vistazo la regla de difusión-no-al-emisor — el mensaje de `alice` llega a `bob` y `carol`, nunca a `alice`. Los tests asertan sobre el objeto reporte (`report.delivery_of("hi everyone").recipients`); un humano lee la versión renderizada. En cualquier caso, la lógica de orquestación es Python plano manejando los clientes _reales_ por el protocolo _real_. No hay ningún canal solo-para-tests en ningún sitio.
+
+<AppliedHere>
+
+- [`src/chatlab/harness.py`](https://github.com/luisep92/cpp_python_testing/blob/main/src/chatlab/harness.py) — el orquestador y el reporte.
+- [`examples/run_scenario.py`](https://github.com/luisep92/cpp_python_testing/blob/main/examples/run_scenario.py) — `chatlab-scenario` lanza el escenario de arriba e imprime el reporte.
+
+</AppliedHere>
+
+## 6. Entonces, ¿por qué no el RPC casero?
+
+Volvamos al desvío del principio. El enfoque del canal a medida es tentador porque cada paso individual es razonable: _"solo necesito manejar el proceso C++ desde un test"_ → un socket de control diminuto. _"Necesito leer sus respuestas"_ → un parser Python para ellas. _"Necesito guionizar algunos escenarios"_ → un orquestador. Nadie decide construir un segundo protocolo; acabas construyéndolo sin darte cuenta.
+
+Lo que acabas pagando:
+
+- **Dos implementaciones que mantener.** Los bugs duplicados son el coste obvio, pero no el peor. Ahora tienes que mantener las dos copias sincronizadas cada vez que el protocolo cambia — cada cambio se propaga a las dos. Y cuando algo falla, no sabes si el bug está en la implementación real o en la de test. Por encima de eso, el fallo clásico: las dos implementaciones se equivocan igual en el mismo caso límite, el test que las compara pasa, verde y mal. (Ese guard byte a byte del Modo 1 existe precisamente porque una segunda implementación, donde de verdad es inevitable, hay que _probar_ que es fiel — no asumirlo.)
+- **Una capa sin testear en la ruta de confianza de cada test.** El canal de control es código. Tiene bugs. Y absolutamente cada test depende ahora de que sea correcto, mientras nada verifica que lo sea.
+- **Gravedad del orquestador.** La lógica que debería vivir en el producto migra al harness de tests, porque el harness es el único sitio que ve ambos lados. El harness crece; la testeabilidad propia del producto no.
+
+Los tres modos lo evitan todo al no introducir nunca un segundo protocolo ni un canal privado: el Modo 1 llama al código real, los Modos 2 y 3 hablan el protocolo real. La única segunda implementación es el constructor de frames del mock, y está fijada a la real byte a byte. Ese es todo el truco.
+
+## 7. Es mínimo — así escala
+
+El chat es de juguete a propósito; la estructura no. Para aplicar esto a un stack real, el mapeo es directo:
+
+- **La partición Capa A / Capa B** → factoriza tu subsistema para que la lógica de protocolo/estado no tenga I/O dentro. Es la única parte que cuesta trabajo de verdad, y se amortiza la primera vez que depuras la lógica pura sin un socket de por medio.
+- **Modo 1** → bindea ese núcleo puro y testéalo en proceso.
+- **Modo 2** → mantén un mock de stdlib que hable tu formato de protocolo real; úsalo para entrada malformada/límite/hostil.
+- **Modo 3** → maneja instancias de cliente reales desde Python con callbacks; orquesta y reporta.
+
+Límites honestos: la demo es una sola sala global, sin auth, sin TLS, solo POSIX, y no distribuye wheels. La concurrencia del Modo 3 es concurrencia real, así que sus tests necesitan la disciplina habitual contra el flaky (el repo usa un puerto efímero más un centinela de readiness en vez de `sleep`, y teardown por grupo de procesos — cosas pequeñas que importan mucho a escala). Y la separación en capas solo ayuda si de verdad mantienes pura la capa pura; en el momento en que no lo es, vuelves al Modo-2-o-nada.
+
+## Bajo el capó: bindear un hilo que llama de vuelta a Python
+
+_Opcional — sáltatelo salvo que bindees hilos C++ a Python._ Bindear la capa pura es fácil. El dispositivo del Modo 3 es donde se pone serio: un objeto C++ que posee un socket y un hilo de recepción de fondo, y ese hilo llama a un callback Python por cada mensaje. Tres cosas tienen que estar bien, y todas viven en la capa de binding — el núcleo C++ nunca menciona Python:
+
+1. **Adquirir el GIL.** El candado global de Python significa que solo un hilo ejecuta Python a la vez, y debes tenerlo para tocar cualquier objeto Python. El hilo de recepción lo creó C++, así que no tiene nada — tiene que adquirir el GIL antes de invocar el callback, o corrompe el intérprete.
+2. **Soltarlo para cerrar.** Cuando Python llama a `disconnect()`, que hace _join_ de ese hilo, Python tiene el GIL. Pero el hilo puede estar a mitad de un callback, esperando el GIL. Python espera al hilo; el hilo espera a Python. Deadlock. El arreglo: soltar el GIL durante el join.
+3. **Romper el ciclo de referencias que el GC no ve.** El dispositivo Python tiene el cliente C++, que tiene (en un `std::function` de C++) el callback Python, que — como método ligado — tiene el dispositivo. Un ciclo. El recolector de basura de Python normalmente sabe romper ciclos, pero no puede _ver_ el tramo que vive dentro de C++, así que nada se libera nunca. Lo rompes a mano: limpia el callback al desconectar.
+
+Nada de esto es exótico, pero es la parte que los tutoriales se saltan, y es por lo que el modelo más estricto de nanobind es una ventaja aquí — saca estos problemas a la frontera en vez de dejar que se pudran en crashes intermitentes.
+
+<AppliedHere>
+
+- [`bindings/chat_bind.cpp`](https://github.com/luisep92/cpp_python_testing/blob/main/bindings/chat_bind.cpp) — el adquirir/soltar el GIL y la rotura del ciclo, en ~40 líneas con comentarios.
+- [`DECISIONS.md`](https://github.com/luisep92/cpp_python_testing/blob/main/DECISIONS.md) — el razonamiento de cada una, escrito según se tomaban las decisiones.
+
+</AppliedHere>
+
+## Pruébalo
+
+```bash
+git clone https://github.com/luisep92/cpp_python_testing && cd cpp_python_testing
+python -m venv .venv && source .venv/bin/activate
+pip install nanobind scikit-build-core ninja pytest pytest-timeout
+pip install --no-build-isolation -Ceditable.rebuild=true -ve .
+
+pytest -q            # los tres modos
+chatlab-scenario     # la demo del orquestador -> imprime el reporte de arriba
+```
+
+El README del repo recorre cada modo con los mismos ejemplos en más profundidad. Si has vivido la versión del RPC casero de esto, me gustaría de verdad saber cómo te fue — los modos de fallo siempre son un poco distintos, y siempre un poco los mismos.
