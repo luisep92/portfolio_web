@@ -18,7 +18,9 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 
 **Rule:** Every artifact in this repo is in English. Project docs (`CLAUDE.md`, `docs/*.md`), skills (`.claude/skills/*/SKILL.md`), code, comments, and git commit messages.
 
-**Why:** The repo is public and the audience is international (senior engineers, recruiters at scale-ups). Mixing languages would force translation friction every time a doc is read by a non-Spanish reader. The site itself is bilingual (EN/ES) for end users — that's a separate axis from the language of the engineering artifacts.
+The working conversation between Luis and Claude is **out of scope** — it happens in whatever language Luis writes in, and that choice never propagates to anything committed.
+
+**Why:** The repo is public and the audience is international (senior engineers, recruiters at scale-ups). Mixing languages would force translation friction every time a doc is read by a non-Spanish reader. The site itself is bilingual (EN/ES) for end users — that's a separate axis from the language of the engineering artifacts. The conversation is a third axis again: it produces no artifact, so constraining it bought nothing and cost fluency.
 
 ---
 
@@ -100,6 +102,7 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 - No environment variables in committed files. `.env.example` with placeholders only.
 - No API keys, auth tokens, internal URLs, or any third-party credential.
 - Past or current client work (María, Opositia, future engagements) is referenced only at the level the client has agreed to. The portfolio mentions them by name and category; no screenshots, no code snippets, no architecture details unless explicitly cleared.
+- **Anonymous lineage is allowed without a gate.** Work *extracted* from client projects — a shared skeleton, a generalized module — can be described publicly at the level of shape ("the same spine was built twice, in two client applications with nothing in common") without naming the client, identifying the domain, or shipping any of their code. Naming stays gated on the client's agreement; the anonymous form is not gated, because it carries nothing that identifies them. First applied in `src/content/projects/{en,es}/saas-template.mdx`, whose two source repos are private and still in progress.
 
 **Why:** The repo *is* part of the demonstration — engineering hygiene visible in the commits and structure is a signal to readers. That same visibility means anything sensitive is sensitive forever (git history is permanent). Cheap to be careful from commit one; expensive to scrub later.
 

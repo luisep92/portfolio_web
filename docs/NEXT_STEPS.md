@@ -177,6 +177,14 @@ LLM hallucinations of the article body (ChatGPT and Gemini both invented content
 - For featured stubs: minimal narrative + "writeup pending" banner is acceptable, per [PRODUCT.md](PRODUCT.md) → "Scope (v1)".
 - **Validation:** index lists all entries in the right tier and order; new e2e spec asserts the Other section renders when populated.
 
+**`saas_template` added as the fifth featured (order 50), EN + ES, full narrative — done.** Promotion decided against the four criteria in [`content-authoring`](../.claude/skills/content-authoring/SKILL.md) → "When to promote": it clears *demonstrable artifacts* and *technical range not already covered*, and the latter is the real argument — the featured reel was Aline / fmodel-mcp / unity-mcp port / this site, i.e. three modding-and-MCP entries plus the portfolio, with **no backend-and-database work visible at all** for the audience [PRODUCT.md](PRODUCT.md) declares. It does not clear *external traction* (repo public since 2026-08-04, no stars). No `coverImage`, consistent with every other entry so far.
+
+The card is written from the reader's side: how you start it (two commands), what you find, what you can delete and why that's the actual point, what's coming next. **Two rules came out of drafting it, both the hard way: a project card describes the artifact as someone would use it — implementation detail earns its place only if a reader deciding whether to clone the thing would want it; and the war story (defects that survived a green CI) belongs in an article linked via `links.article`, not in the card, where it argues against the credibility the card is trying to build.**
+
+Lineage referenced anonymously — the two source repos are private and WIP, so the entry says "two client applications with nothing in common" and names neither. That widened [DECISIONS.md → "Public repo from day one"](DECISIONS.md) with an explicit anonymous-lineage bullet, same commit.
+
+**Drift spotted while doing this, not resolved here:** the step header still reads "pending" and the Current-state line still says "Next: Step 13 other projects", but every "other" project it lists (Hollow Knight mods, Bisbot, NEAT, EasyAvahi, rankedle) already exists with a tier, plus several the step never mentioned. The step looks substantially complete from a later session that didn't close it. Someone should verify the remaining scope — the María / Opositia featured stubs, which the anonymous-lineage bullet above may now change the shape of — and close or re-scope it.
+
 ### 14. Close open visual decisions — pending
 
 **Goal:** Accent color, typography, the "one moment of character" on home, and the **ambient background texture** all picked. Each closed entry moves from [DECISIONS.md → Open](DECISIONS.md) into the body of the doc. Closing the accent unblocks the deferred coloured `<Callout>` variants from Step 8.
@@ -208,6 +216,7 @@ The ambient bg texture is a new open sub-decision added during Step 11's polish 
 
 - **Aline featured project writeup** — blocked on Luis's project shipping plus video assembly. When unblocked: add full narrative + `<VideoEmbed />` to `src/content/projects/{en,es}/aline-boss-fight.mdx`, set `tier: 'featured'`, drop the entry into `/projects` listing, add an e2e spec exercising the video poster + lazy load.
 - Second AI article (the "secured environment for Claude Code" piece — limit git, mock secrets, kernel limitations).
+- **Article: what a green CI doesn't tell you** — the material cut from the `saas_template` project card. Three defects that survived a passing unit + e2e suite because none of them are observable one-request-at-a-time: a daily quota implemented as check-then-increment (`SELECT ... FOR UPDATE` locks nothing when the row doesn't exist yet), a mock-mode switch that also disabled login rate limiting, and refresh-token rotation that rejected a replay without revoking the family. Same axis as [chatlab](../src/content/projects/en/chatlab.mdx) and the C++/Python testing piece: what a suite buys you and what it structurally cannot. When written, link it from the project card via `links.article`.
 - Spanish translation of `practical-workflow-claude-code` once tone is settled in EN.
 - Full ES translations of all featured project narratives and the launch articles.
 - Additional articles.

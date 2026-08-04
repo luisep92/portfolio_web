@@ -1,0 +1,24 @@
+---
+title: saas_template
+summary: Un starter full-stack de SaaS — FastAPI + PostgreSQL + Next.js, con auth, chat con IA, tiers de uso, log de auditoría, Docker y CI. Hecho como módulos que borras, no como un monolito que heredas. Extraído de dos aplicaciones de cliente que habían acabado con el mismo esqueleto.
+tier: featured
+order: 50
+year: 2026
+role: Autor único
+links:
+  repo: https://github.com/luisep92/saas_template
+---
+
+Dos aplicaciones de cliente, dominios que no tienen nada que ver, y para la segunda ya estaba escribiendo los mismos ficheros de auth, medición de uso y auditoría — mismos nombres, mismos sitios, mismo trabajo. Los dos repos son privados y siguen en marcha. Esta es la tercera vez, sacada aparte para poder reusarla.
+
+Arrancarlo son dos comandos: `cp .env.example .env` y `make fresh`. Docker Compose levanta PostgreSQL, el backend de FastAPI y el frontend de Next.js, aplica las migraciones y siembra la base de datos. `make test` va en verde desde un clone limpio — primero la suite de unit tests, luego los specs de Playwright — antes de que hayas tocado nada. La documentación de la API se genera sola en `/docs`.
+
+Lo que te encuentras: registro y login con JWT y rotación de refresh, un chat con IA con respuestas en streaming e historial de sesiones guardadas, límites diarios FREE/BASIC/PRO con sus contadores, un log de auditoría append-only, y analítica con banner de cookies. El chat habla con un generador mock hasta que pones una API key, así que puedes montar el flujo entero sin gastar un céntimo en tokens.
+
+La parte que de verdad me importa es lo que puedes tirar. Cada módulo documenta cómo se quita: qué ficheros borras, qué líneas tienen que salir con ellos, qué migración generas después. Auth es el núcleo porque todo lo protegido depende de él; el resto sale limpio. La mayoría de starters te dan el paquete entero y ya descubrirás tú cuál de los hilos aguanta peso — así que te quedas para siempre con el chat de IA que nunca quisiste, porque arrancarlo es una tarde mala.
+
+Vienen más cosas, y Stripe es la siguiente: los settings y la columna de customer id ya están, y la implementación que funciona vive en una de las dos aplicaciones de las que salió esto — hay que generalizarla, no escribirla. Después, i18n, y un generador de Anthropic junto al mock y al de OpenAI. Los módulos nuevos entran igual que entró todo esto: primero se lo ganan en un proyecto real, y luego se extraen con sus tests.
+
+<Callout kind="aside">
+  Repo público, MIT. github.com/luisep92/saas_template
+</Callout>

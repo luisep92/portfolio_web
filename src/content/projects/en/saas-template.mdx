@@ -1,0 +1,24 @@
+---
+title: saas_template
+summary: A full-stack SaaS starter — FastAPI + PostgreSQL + Next.js, with auth, AI chat, usage tiers, audit log, Docker and CI. Built as modules you delete rather than a monolith you inherit. Extracted from two client applications that had ended up with the same skeleton.
+tier: featured
+order: 50
+year: 2026
+role: Solo author
+links:
+  repo: https://github.com/luisep92/saas_template
+---
+
+Two client applications, domains with nothing in common, and by the second one I was writing the same auth, usage-metering and audit files — same names, same places, same jobs. Both repos are private and still moving. This is the third time, pulled out into something reusable.
+
+Starting it is two commands: `cp .env.example .env` and `make fresh`. Docker Compose brings up PostgreSQL, the FastAPI backend and the Next.js frontend, runs the migrations and seeds the database. `make test` is green on a clean clone — unit suite first, then the Playwright specs — before you've touched anything. API docs generate themselves at `/docs`.
+
+What you get: registration and login with JWT and refresh rotation, an AI chat with streaming responses and saved session history, FREE/BASIC/PRO daily limits with their counters, an append-only audit log, and analytics with a cookie banner. The chat talks to a mock generator until you add an API key, so you can build the whole flow without spending anything on tokens.
+
+The part I actually care about is what you delete. Each module documents its own removal: the files to drop, the lines that have to come out with them, the migration to generate afterwards. Auth is the core because everything protected depends on it; the rest comes out cleanly. Most starters hand you the whole thing and let you find out later which threads are load-bearing — so you keep the AI chat you never wanted, forever, because pulling it is a bad afternoon.
+
+More is coming, and Stripe is next: the settings and the customer-id column are already there, and the working implementation lives in one of the two applications this came from — it needs generalizing, not writing. After that, i18n, and an Anthropic generator alongside the mock and OpenAI ones. New modules land the same way this whole thing did: they earn it in a real project first, then get extracted with their tests.
+
+<Callout kind="aside">
+  Public repo, MIT. github.com/luisep92/saas_template
+</Callout>
