@@ -102,6 +102,7 @@ The working conversation between Luis and Claude is **out of scope** — it happ
 - No environment variables in committed files. `.env.example` with placeholders only.
 - No API keys, auth tokens, internal URLs, or any third-party credential.
 - Past or current client work (María, Opositia, future engagements) is referenced only at the level the client has agreed to. The portfolio mentions them by name and category; no screenshots, no code snippets, no architecture details unless explicitly cleared.
+- **Anonymous lineage is allowed without a gate.** Work *extracted* from client projects — a shared skeleton, a generalized module — can be described publicly at the level of shape ("the same spine was built twice, in two client applications with nothing in common") without naming the client, identifying the domain, or shipping any of their code. Naming stays gated on the client's agreement; the anonymous form is not gated, because it carries nothing that identifies them. First applied in `src/content/projects/{en,es}/saas-template.mdx`, whose two source repos are private and still in progress.
 
 **Why:** The repo *is* part of the demonstration — engineering hygiene visible in the commits and structure is a signal to readers. That same visibility means anything sensitive is sensitive forever (git history is permanent). Cheap to be careful from commit one; expensive to scrub later.
 
