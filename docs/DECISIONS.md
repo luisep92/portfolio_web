@@ -18,7 +18,9 @@ Open decisions are listed at the bottom under [Open](#open-decisions). When one 
 
 **Rule:** Every artifact in this repo is in English. Project docs (`CLAUDE.md`, `docs/*.md`), skills (`.claude/skills/*/SKILL.md`), code, comments, and git commit messages.
 
-**Why:** The repo is public and the audience is international (senior engineers, recruiters at scale-ups). Mixing languages would force translation friction every time a doc is read by a non-Spanish reader. The site itself is bilingual (EN/ES) for end users — that's a separate axis from the language of the engineering artifacts.
+The working conversation between Luis and Claude is **out of scope** — it happens in whatever language Luis writes in, and that choice never propagates to anything committed.
+
+**Why:** The repo is public and the audience is international (senior engineers, recruiters at scale-ups). Mixing languages would force translation friction every time a doc is read by a non-Spanish reader. The site itself is bilingual (EN/ES) for end users — that's a separate axis from the language of the engineering artifacts. The conversation is a third axis again: it produces no artifact, so constraining it bought nothing and cost fluency.
 
 ---
 

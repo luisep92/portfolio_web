@@ -51,7 +51,9 @@ His estimates of manual friction are systematically low. Past evidence: `unity-m
 
 ### Language
 
-Conversation, project files (docs, code, comments), and git commits: **English**. Everything in this repo is in English so that the public audience can read it without translation friction. Detail in [docs/DECISIONS.md → "Language"](docs/DECISIONS.md).
+Everything committed to the repo — docs, skills, code, comments, git commits — is in **English**, so the public audience reads it without translation friction.
+
+The conversation is **not** an artifact: it happens in whatever language Luis opens in. Answering in Spanish never changes the language of what gets committed. Detail in [docs/DECISIONS.md → "Language"](docs/DECISIONS.md).
 
 ---
 
