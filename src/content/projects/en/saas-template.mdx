@@ -1,15 +1,15 @@
 ---
 title: saas_template
-summary: A full-stack SaaS starter — FastAPI + PostgreSQL + Next.js, with auth, AI chat, usage tiers, audit log, Docker and CI. Built as modules you delete rather than a monolith you inherit. Extracted from two client applications that had ended up with the same skeleton.
+summary: A full-stack SaaS starter — FastAPI + PostgreSQL + Next.js, with auth, AI chat, usage tiers, audit log, Docker and CI. Built as modules you delete rather than a monolith you inherit. Extracted from two applications that had independently ended up with the same skeleton.
 tier: featured
-order: 50
+order: 5
 year: 2026
 role: Solo author
 links:
   repo: https://github.com/luisep92/saas_template
 ---
 
-Two client applications, domains with nothing in common, and by the second one I was writing the same auth, usage-metering and audit files — same names, same places, same jobs. Both repos are private and still moving. This is the third time, pulled out into something reusable.
+Two applications, domains with nothing in common, and by the second one I was writing the same auth, usage-metering and audit files — same names, same places, same jobs. Both repos are private and still moving. This is the third time, pulled out into something reusable.
 
 Starting it is two commands: `cp .env.example .env` and `make fresh`. Docker Compose brings up PostgreSQL, the FastAPI backend and the Next.js frontend, runs the migrations and seeds the database. `make test` is green on a clean clone — unit suite first, then the Playwright specs — before you've touched anything. API docs generate themselves at `/docs`.
 
